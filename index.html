@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Siaⁿ-bó + Phīⁿ-hòa-bó-im</title>
+    <!-- 載入 Tailwind CSS 用於自適應布局 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* 引入優美的芫荽 (Iansui) 網頁字型，以高清晰度呈現羅馬字調符 */
+        @import url('https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.css');
+
+        :root {
+            /* 智慧高度比例預算，在大螢幕與手機上動態調整高度，防止被切除 */
+            --item-h: clamp(140px, 38vh, 400px); 
+        }
+
+        @media (max-width: 768px) {
+            :root {
+                --item-h: clamp(110px, 25vh, 200px);
+            }
+        }
+
+        body {
+            font-family: 'Iansui', sans-serif;
+            background-color: #78350f; 
+            height: 100vh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* 徹底鎖定視窗，禁止出現外層捲軸，確保 100% 不跑版 */
+            user-select: none;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; 
+            box-sizing: border-box;
+        }
+
+        /* 璀璨金沙風琥珀金黃到深咖啡色漸層背景 */
+        .gold-ambient-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #f59e0b 0%, #d97706 35%, #92400e 70%, #78350f 100%);
+            z-index: -2;
+        }
+
+        /* 頂部大標題：金發光效果，投影幕與手機上均置中優化 */
+        .shiny-gold-title {
+            color: #451a03; 
+            text-shadow: 0 4px 0px #ffffff, 0 6px 15px rgba(251, 191, 36, 0.6);
+            animation: breathe-gold 3s ease-in-out infinite alternate;
+        }
+        @keyframes breathe-gold {
+            0% { transform: scale(0.98); text-shadow: 0 4px 0px #ffffff, 0 4px 10px rgba(251, 191, 36, 0.4); }
+            100% { transform: scale(1.01); text-shadow: 0 4px 0px #ffffff, 0 8px 25px rgba(251, 191, 36, 0.8); }
+        }
+
+        /* 頂部標題字型比例，手機/大螢幕皆完美置中 */
+        .top-title {
+            font-size: clamp(1.8rem, 6.5vh, 3.8rem); 
+            text-align: center;
+            line-height: 1.1;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .top-title {
+                font-size: clamp(1.2rem, 5vh, 2.0rem);
+                max-width: 75%; /* 給兩側留出呼吸空間，避免直接蓋到右上角工具箱 */
+                margin: 0 auto;
+                text-align: center;
+            }
+        }
+
+        /* 拉霸機外框：深黃金與古銅漸層，搭配璀璨金黃發光 */
+        .neon-border-gold {
+            background: linear-gradient(135deg, #fbbf24 0%, #b45309 50%, #78350f 100%);
+            box-shadow: 0 0 20px #fbbf24, 0 0 35px #d97706, inset 0 0 15px #f59e0b;
+            animation: neon-pulse 3s infinite alternate;
+        }
+        @keyframes neon-pulse {
+            0% { box-shadow: 0 0 15px #fbbf24, 0 0 25px #d97706, inset 0 0 12px #f59e0b; }
+            100% { box-shadow: 0 0 25px #fde047, 0 0 45px #b45309, inset 0 0 20px #d97706; }
+        }
+
+        /* LED 雙色交替閃爍燈（亮黃與暖橘） */
+        .led-dot {
+            width: 10px; height: 10px; border-radius: 50%; background-color: #fff; margin: 3px;
+        }
+        .led-dot.even { animation: blink-gold-yellow 0.6s infinite alternate; }
+        .led-dot.odd { animation: blink-gold-orange 0.6s infinite alternate-reverse; }
+        @keyframes blink-gold-yellow { 0% { background-color: #fef08a; box-shadow: 0 0 8px #eab308; } 100% { background-color: #ca8a04; opacity: 0.3; } }
+        @keyframes blink-gold-orange { 0% { background-color: #fed7aa; box-shadow: 0 0 8px #ea580c; } 100% { background-color: #c2410c; opacity: 0.3; } }
+
+        /* 滾筒物理裁切框 */
+        .slot-window { position: relative; width: 100%; height: var(--item-h); overflow: hidden; }
+        .slot-strip { position: absolute; top: 0; left: 0; width: 100%; display: flex; flex-direction: column; }
+        
+        .slot-item {
+            height: var(--item-h);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; text-align: center; width: 100%; line-height: 1;
+            box-sizing: border-box; 
+            padding-bottom: 0.12em; /* 避免向下的字母 (如 p, j, g, ⁿ 等) 尾巴被截斷 */
+        }
+
+        /* 🎯 巨幕投影專用：字型等比例物理縮放，手機上自動微調縮小適配 */
+        .font-size-fit-1 { font-size: calc(var(--item-h) * 0.76); } /* 單字母 */
+        .font-size-fit-2 { font-size: calc(var(--item-h) * 0.63); } /* 雙字母 */
+        .font-size-fit-3 { font-size: calc(var(--item-h) * 0.50); } /* 三字母 */
+        .font-size-fit-4 { font-size: calc(var(--item-h) * 0.40); } /* 四字元以上 */
+        .font-size-fit-special { font-size: calc(var(--item-h) * 0.24); } /* 初始與結束文字 */
+
+        @media (max-width: 768px) {
+            .font-size-fit-1 { font-size: calc(var(--item-h) * 0.68); }
+            .font-size-fit-2 { font-size: calc(var(--item-h) * 0.56); }
+            .font-size-fit-3 { font-size: calc(var(--item-h) * 0.45); }
+            .font-size-fit-4 { font-size: calc(var(--item-h) * 0.36); }
+            .font-size-fit-special { font-size: calc(var(--item-h) * 0.20); }
+        }
+
+        /* 自訂面板與對照表的暗色高質感滾動條 */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #d97706; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #f59e0b; }
+    </style>
+</head>
+<body class="relative">
+
+    <div class="gold-ambient-bg"></div>
+    <canvas id="confetti-canvas" class="absolute top-0 left-0 w-full h-full pointer-events-none z-50"></canvas>
+
+    <!-- 頂部區：大標題 (限制在 10vh 內，大螢幕與手機上均完美置中) -->
+    <header class="w-full pt-3 pb-1 px-4 flex justify-center items-center z-10 h-[10vh] min-h-[50px] relative">
+        <h1 class="top-title font-black tracking-tight shiny-gold-title select-none text-center">
+            Siaⁿ-bó + Phīⁿ-hòa-bó-im
+        </h1>
+    </header>
+
+    <!-- 中部主拉霸區 (配給 68vh 空間，完美適配直立手機與大投影幕) -->
+    <main class="flex-grow flex flex-col items-center justify-center px-3 md:px-4 w-full max-h-[68vh] gap-3">
+        <div id="slot-machine-container" class="relative p-4 md:p-5 rounded-[2.5rem] border-4 border-white neon-border-gold shadow-2xl flex flex-col items-center w-[95vw] max-w-[1200px]">
+            <!-- 上排霓虹 LED 燈 -->
+            <div class="flex justify-around w-full mb-3" id="led-top"></div>
+
+            <!-- 拉霸白盒子雙欄 -->
+            <div class="flex gap-3 md:gap-6 w-full justify-center items-center">
+                <!-- 左欄白色方格 (聲母) -->
+                <div id="left-box" class="relative flex-1 bg-white rounded-3xl flex items-center justify-center overflow-hidden shadow-inner border-4 border-amber-100 hover:border-amber-300 transition-all cursor-pointer h-[var(--item-h)] z-20">
+                    <div id="left-shield" class="absolute inset-0 bg-white/40 z-20 hidden pointer-events-none"></div>
+                    <div class="slot-window">
+                        <div id="left-strip" class="slot-strip">
+                            <div class="slot-item font-size-fit-special text-slate-700">Chún-pī</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右欄白色方格 (鼻化母音) -->
+                <div id="right-box" class="relative flex-1 bg-white rounded-3xl flex items-center justify-center overflow-hidden shadow-inner border-4 border-amber-100 hover:border-amber-300 transition-all cursor-pointer h-[var(--item-h)] z-20">
+                    <div id="right-shield" class="absolute inset-0 bg-white/40 z-20 hidden pointer-events-none"></div>
+                    <div class="slot-window">
+                        <div id="right-strip" class="slot-strip">
+                            <div class="slot-item font-size-fit-special text-slate-700">Khai-sí</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 下排霓虹 LED 燈 -->
+            <div class="flex justify-around w-full mt-4" id="led-bottom"></div>
+        </div>
+    </main>
+
+    <!-- 底部控制區與進度圓點 (限制在 22vh 內，pb-8 保障安全置底) -->
+    <footer class="w-full mt-auto pb-8 pt-1 px-4 z-20 flex flex-col items-center gap-3 h-[22vh] justify-end">
+        <!-- 同步雙轉與對照字表雙按鈕排版 (手機上自動調整寬度與字體大小) -->
+        <div class="flex flex-wrap justify-center gap-3 w-full max-w-lg z-20">
+            <button id="dual-spin-btn" class="flex-1 bg-gradient-to-r from-amber-400 to-orange-500 hover:from-amber-300 hover:to-orange-400 text-amber-950 font-black text-sm sm:text-base md:text-xl py-3 px-4 rounded-2xl border-4 border-white shadow-[0_6px_20px_rgba(217,119,6,0.3)] transform active:scale-95 transition-all tracking-wider whitespace-nowrap">
+                Tâng-chê tńg!
+            </button>
+            <button id="chart-toggle-btn" class="flex-1 bg-white/95 hover:bg-white text-amber-950 font-black text-sm sm:text-base md:text-xl py-3 px-4 rounded-2xl border-4 border-amber-400 shadow-md transform active:scale-95 transition-all tracking-wider whitespace-nowrap flex justify-center items-center gap-1">
+                📋 對照字表
+            </button>
+        </div>
+
+        <!-- 20顆進度圓點（答對時綠燈發光） -->
+        <div class="flex flex-wrap justify-center gap-1.5 md:gap-2 max-w-4xl" id="progress-container"></div>
+    </footer>
+
+    <!-- 右上角 BGM 與自訂教材齒輪面板 -->
+    <div class="absolute top-4 right-4 z-40 flex gap-2">
+        <button id="bgm-toggle-btn" class="bg-white/80 hover:bg-white text-amber-950 px-2 sm:px-4 py-2 rounded-full shadow-md backdrop-blur border border-amber-200 transition-all text-xs sm:text-sm font-bold flex items-center gap-1">
+            🎵 OFF
+        </button>
+        <button id="settings-toggle-btn" class="bg-white/80 hover:bg-white text-amber-950 p-2 rounded-full shadow-md backdrop-blur border border-amber-200 transition-colors">
+            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-amber-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+        </button>
+        <div id="settings-panel" class="hidden absolute top-12 right-0 bg-slate-950 text-white w-[300px] sm:w-[450px] p-4 sm:p-6 rounded-2xl shadow-2xl border border-amber-800/40 max-h-[80vh] overflow-y-auto">
+            <h2 class="text-lg sm:text-xl font-bold mb-3 text-amber-400">⚙️ 編輯白話字教材</h2>
+            <div id="error-msg" class="text-rose-400 text-xs sm:text-sm font-bold mb-3 hidden"></div>
+            <!-- 嚴格物理隔離設計：左右面板不串寫 -->
+            <div class="grid grid-cols-2 gap-3 sm:gap-4 mb-5">
+                <div>
+                    <h3 class="text-xs font-bold mb-2 text-amber-300 uppercase tracking-wider">左欄聲母</h3>
+                    <div id="left-inputs-container" class="space-y-1.5"></div>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold mb-2 text-sky-300 uppercase tracking-wider">右欄鼻化母音</h3>
+                    <div id="right-inputs-container" class="space-y-1.5"></div>
+                </div>
+            </div>
+            <button id="save-settings-btn" class="w-full bg-gradient-to-r from-amber-400 to-orange-500 text-amber-950 font-black py-3 rounded-xl transition-all text-sm sm:text-base">儲存並重啟遊戲</button>
+        </div>
+    </div>
+
+    <!-- 全螢幕聲韻母全覽對照字表 (全自適應置中大版面) -->
+    <div id="chart-overlay" class="hidden fixed inset-0 bg-amber-950/95 z-50 flex flex-col justify-between p-4 sm:p-8 select-none">
+        <!-- 頂部標題 -->
+        <div class="text-center">
+            <h2 class="text-xl sm:text-3xl md:text-4xl font-bold text-yellow-300 flex justify-center items-center gap-2 mb-1">
+                📋 Siaⁿ-bó + Phīⁿ-hòa-bó-im 對照字表
+            </h2>
+            <p class="text-amber-100 text-xs sm:text-sm">此對照字表會隨著「編輯教材」中的變更即時渲染</p>
+        </div>
+
+        <!-- 雙欄內容展示區 (調大欄數以減少行數，使 100% 高度時能看見全部) -->
+        <div class="flex-grow my-4 sm:my-6 grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 max-w-7xl mx-auto w-full overflow-y-auto">
+            <!-- 聲母區 (Siaⁿ-bó) - 增加欄數減少高度 -->
+            <div class="bg-amber-900/40 p-3 sm:p-5 rounded-3xl border-2 border-amber-500/30 flex flex-col justify-center">
+                <h3 class="text-base sm:text-xl font-bold text-amber-300 mb-3 pb-1 border-b border-amber-500/30 flex items-center gap-1">
+                    🎯 聲母 (Siaⁿ-bó)
+                </h3>
+                <div id="chart-left-grid" class="grid grid-cols-5 sm:grid-cols-6 gap-2">
+                    <!-- JavaScript 將在此動態渲染加大的聲母卡片 -->
+                </div>
+            </div>
+
+            <!-- 鼻化母音區 (Phīⁿ-hòa-bó-im) - 增加欄數減少高度 -->
+            <div class="bg-amber-900/40 p-3 sm:p-5 rounded-3xl border-2 border-amber-500/30 flex flex-col justify-center">
+                <h3 class="text-base sm:text-xl font-bold text-sky-300 mb-3 pb-1 border-b border-amber-500/30 flex items-center gap-1">
+                    ✨ 鼻化母音 (Phīⁿ-hòa-bó-im)
+                </h3>
+                <div id="chart-right-grid" class="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    <!-- JavaScript 將在此動態渲染加大的韻母卡片 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部關閉按鈕 -->
+        <div class="flex justify-center">
+            <button id="chart-close-btn" class="bg-yellow-400 hover:bg-yellow-300 text-amber-950 font-black text-sm sm:text-lg px-10 py-2.5 rounded-2xl border-2 sm:border-4 border-white shadow-lg transition-all transform active:scale-95">
+                返回遊戲 ✕
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 預設教材單字資料 (右欄為您指定的 13 個鼻化母音)
+        const DEFAULT_LEFT = ['p', 'ph', 'm', 'b', 't', 'th', 'n', 'l', 'k', 'kh', 'h', 'g', 'ng', 'ch', 'chh', 's', 'j'];
+        const DEFAULT_RIGHT = ['aⁿ', 'iⁿ', 'oⁿ', 'eⁿ', 'aiⁿ', 'auⁿ', 'iaⁿ', 'iuⁿ', 'ioⁿ', 'uiⁿ', 'oaⁿ', 'oaiⁿ', 'iauⁿ'];
+
+        let currentLeftList = [...DEFAULT_LEFT];
+        let currentRightList = [...DEFAULT_RIGHT];
+        let leftPool = [], rightPool = [], currentIndex = 0;
+        const TOTAL_QUESTIONS = 20;
+        
+        // 狀態管理：'ready', 'spinning', 'waiting', 'celebrated', 'finished'
+        let gameState = 'ready'; 
+        let currentLeftWord = "Chún-pī", currentRightWord = "Khai-sí";
+
+        const leftStrip = document.getElementById('left-strip'), rightStrip = document.getElementById('right-strip');
+        const dualSpinBtn = document.getElementById('dual-spin-btn');
+        const leftBox = document.getElementById('left-box'), rightBox = document.getElementById('right-box');
+        const progressContainer = document.getElementById('progress-container'), settingsPanel = document.getElementById('settings-panel');
+        const leftShield = document.getElementById('left-shield'), rightShield = document.getElementById('right-shield');
+        const chartOverlay = document.getElementById('chart-overlay');
+        
+        let audioCtx = null;
+
+        // 依據字長與裝置大小物理調整字型大小百分比
+        function getFontSizeClass(text) {
+            if (text === "Chún-pī" || text === "Khai-sí" || text === "Oân-sêng!") return "font-size-fit-special";
+            if (text.length >= 4) return "font-size-fit-4";
+            if (text.length === 3) return "font-size-fit-3";
+            if (text.length === 2) return "font-size-fit-2";
+            return "font-size-fit-1";
+        }
+
+        function initAudio() { 
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (AudioContext) audioCtx = new AudioContext();
+            } 
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); 
+        }
+
+        // 機械敲擊滴答音效 ( sine 波形 )
+        function playSpinTick() {
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(650, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.03);
+                gain.gain.setValueAtTime(0.12, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.03);
+                osc.start(now);
+                osc.stop(now + 0.03);
+            } catch (e) {}
+        }
+
+        // 答對勝利琶音 ( C4 -> E4 -> G4 -> C5 快速琵音 )
+        function playVictorySound() {
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                const notes = [261.63, 329.63, 392.00, 523.25];
+                notes.forEach((f, i) => {
+                    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+                    o.type = 'triangle';
+                    o.frequency.setValueAtTime(f, now + i * 0.08);
+                    g.gain.setValueAtTime(0, now + i * 0.08);
+                    g.gain.linearRampToValueAtTime(0.15, now + i * 0.08 + 0.04);
+                    g.gain.exponentialRampToValueAtTime(0.01, now + i * 0.08 + 0.5);
+                    o.connect(g); g.connect(audioCtx.destination);
+                    o.start(now + i * 0.08); o.stop(now + i * 0.08 + 0.5);
+                });
+            } catch (e) {}
+        }
+
+        // 純程式碼 Web Audio API BGM 機制 (溫和的台語大調五聲音階旋律)
+        let bgmInterval = null;
+        let bgmStep = 0;
+        let isBgmPlaying = false;
+        const melody = [
+            261.63, 293.66, 329.63, 392.00, 440.00, 392.00, 329.63, 293.66,
+            329.63, 392.00, 440.00, 523.25, 587.33, 523.25, 440.00, 392.00
+        ];
+
+        function playBgmStep() {
+            if (!audioCtx || !isBgmPlaying) return;
+            try {
+                const now = audioCtx.currentTime;
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.type = 'triangle'; 
+                osc.frequency.setValueAtTime(melody[bgmStep % melody.length], now);
+                
+                // 極小背景音量，講課不干擾
+                gain.gain.setValueAtTime(0, now);
+                gain.gain.linearRampToValueAtTime(0.02, now + 0.05);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+                
+                osc.start(now);
+                osc.stop(now + 0.25);
+                
+                bgmStep++;
+            } catch (e) {}
+        }
+
+        function toggleBgm() {
+            initAudio();
+            const btn = document.getElementById('bgm-toggle-btn');
+            if (isBgmPlaying) {
+                isBgmPlaying = false;
+                clearInterval(bgmInterval);
+                btn.className = "bg-white/80 hover:bg-white text-amber-950 px-2 sm:px-4 py-2 rounded-full shadow-md backdrop-blur border border-amber-200 transition-all text-xs sm:text-sm font-bold flex items-center gap-1";
+                btn.innerHTML = '🎵 OFF';
+            } else {
+                isBgmPlaying = true;
+                bgmStep = 0;
+                bgmInterval = setInterval(playBgmStep, 250); 
+                btn.className = "bg-yellow-300 text-amber-950 px-2 sm:px-4 py-2 rounded-full shadow-md backdrop-blur border border-yellow-200 transition-all text-xs sm:text-sm font-bold flex items-center gap-1 animate-pulse";
+                btn.innerHTML = '🎶 ON';
+            }
+        }
+        
+        document.getElementById('bgm-toggle-btn').onclick = (e) => {
+            e.stopPropagation();
+            toggleBgm();
+        };
+
+        // Canvas 對角彩炮噴發特效 (從左下角與右下角朝中間偏上噴灑)
+        const canvas = document.getElementById('confetti-canvas'), ctx = canvas.getContext('2d');
+        let particles = [];
+        
+        function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+        window.onresize = resize; resize();
+
+        class ConfettiParticle { 
+            constructor(side) { 
+                this.side = side; 
+                this.x = side === 'left' ? 0 : canvas.width; 
+                this.y = canvas.height; 
+                this.r = Math.random() * 8 + 4; 
+                
+                // 左邊往右上偏，右邊往左上偏
+                this.dx = side === 'left' ? (Math.random() * 9 + 4) : -(Math.random() * 9 + 4); 
+                this.dy = -(Math.random() * 15 + 11); 
+                this.gravity = 0.35;
+                // 金橘與喜慶粉紅嫩色組合
+                this.c = `hsl(${[35, 15, 340, 45][Math.floor(Math.random() * 4)] + Math.random() * 15}, 95%, 65%)`; 
+            } 
+            update(){ 
+                this.x += this.dx; 
+                this.dy += this.gravity; 
+                this.y += this.dy; 
+            } 
+            draw(){ 
+                ctx.fillStyle = this.c; 
+                ctx.beginPath(); 
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2); 
+                ctx.fill(); 
+            } 
+        }
+
+        function triggerConfetti() { 
+            particles = [
+                ...Array.from({length: 50}, () => new ConfettiParticle('left')),
+                ...Array.from({length: 50}, () => new ConfettiParticle('right'))
+            ]; 
+            loopConfetti(); 
+        }
+
+        function loopConfetti() { 
+            ctx.clearRect(0, 0, canvas.width, canvas.height); 
+            particles.forEach(p => { p.update(); p.draw(); }); 
+            if (particles.some(p => p.y < canvas.height && p.x > -50 && p.x < canvas.width + 50)) {
+                requestAnimationFrame(loopConfetti); 
+            } else {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function shuffle(a) { 
+            for (let i = a.length - 1; i > 0; i--) { 
+                const j = Math.floor(Math.random() * (i + 1)); 
+                [a[i], a[j]] = [a[j], a[i]]; 
+            } 
+            return a; 
+        }
+
+        function generatePools() { 
+            leftPool = []; 
+            rightPool = []; 
+            for (let i = 0; i < TOTAL_QUESTIONS; i++) { 
+                leftPool.push(currentLeftList[i % currentLeftList.length]); 
+                rightPool.push(currentRightList[i % currentRightList.length]); 
+            } 
+            shuffle(leftPool); 
+            shuffle(rightPool); 
+        }
+        
+        function buildDots() { 
+            progressContainer.innerHTML = ''; 
+            for (let i = 0; i < TOTAL_QUESTIONS; i++) { 
+                const d = document.createElement('div'); 
+                d.className = 'w-3.5 h-3.5 rounded-full bg-slate-800/20 border border-white transition-all duration-500'; 
+                d.id = `dot-${i}`; 
+                progressContainer.appendChild(d); 
+            } 
+        }
+
+        function createLEDs() { 
+            const t = document.getElementById('led-top'), b = document.getElementById('led-bottom'); 
+            t.innerHTML = ''; b.innerHTML = ''; 
+            for (let i = 0; i < 16; i++) { 
+                const l1 = document.createElement('div'); 
+                l1.className = `led-dot ${i % 2 === 0 ? 'even' : 'odd'}`; 
+                t.appendChild(l1); 
+                const l2 = document.createElement('div'); 
+                l2.className = `led-dot ${i % 2 !== 0 ? 'even' : 'odd'}`; 
+                b.appendChild(l2); 
+            } 
+        }
+
+        function setStatic(strip, text, isResult = false) {
+            const isLeft = strip.id.includes('left');
+            const color = isResult ? (isLeft ? 'text-amber-600' : 'text-yellow-600') : 'text-slate-700';
+            strip.style.transition = 'none'; strip.style.transform = 'translateY(0px)';
+            strip.innerHTML = `<div class="slot-item ${getFontSizeClass(text)} ${color} select-none leading-none">${text}</div>`;
+        }
+
+        function animateSpin(strip, start, target, list, duration) {
+            return new Promise(resolve => {
+                const scrollArr = [start]; 
+                for (let i = 0; i < 20; i++) scrollArr.push(list[Math.floor(Math.random() * list.length)]); 
+                scrollArr.push(target);
+                
+                strip.innerHTML = scrollArr.map(w => `<div class="slot-item ${getFontSizeClass(w)} ${w === start || w === target ? 'text-slate-700' : 'text-slate-300'} select-none leading-none">${w}</div>`).join('');
+                strip.style.transition = 'none'; strip.style.transform = 'translateY(0px)';
+                strip.offsetHeight; // 強制重繪
+                
+                strip.style.transition = `transform ${duration}ms cubic-bezier(0.1, 0.8, 0.15, 1.0)`;
+                strip.style.transform = `translateY(calc(-${scrollArr.length - 1} * var(--item-h)))`;
+                
+                let tickCount = 0;
+                const tickInterval = setInterval(() => {
+                    playSpinTick();
+                    tickCount++;
+                    if (tickCount >= 15) clearInterval(tickInterval);
+                }, duration / 18);
+
+                setTimeout(() => { clearInterval(tickInterval); setStatic(strip, target, true); resolve(); }, duration);
+            });
+        }
+
+        // 手動控制三擊循環（簡報筆/遠端滑鼠模式），100% 鋼鐵控題原地停留
+        function handleInteraction() {
+            initAudio();
+            
+            // 狀態 A：準備好、或已經慶祝完畢 ➜ 開始旋轉下一題
+            if (gameState === 'ready' || gameState === 'celebrated') {
+                if (currentIndex >= TOTAL_QUESTIONS) { 
+                    showEnd(); 
+                    return; 
+                }
+                
+                gameState = 'spinning';
+                leftShield.classList.remove('hidden'); rightShield.classList.remove('hidden');
+                
+                const t1 = leftPool[currentIndex], t2 = rightPool[currentIndex];
+                Promise.all([
+                    animateSpin(leftStrip, currentLeftWord, t1, currentLeftList, 1500), 
+                    animateSpin(rightStrip, currentRightWord, t2, currentRightList, 1500)
+                ])
+                .then(() => { 
+                    currentLeftWord = t1; 
+                    currentRightWord = t2; 
+                    leftShield.classList.add('hidden'); 
+                    rightShield.classList.add('hidden'); 
+                    gameState = 'waiting'; // 原地等待，絕不自動過渡
+                });
+            } 
+            // 狀態 B：停在答案畫面上，按第二下 ➜ 撒花慶祝、亮起下方圓點
+            else if (gameState === 'waiting') {
+                gameState = 'celebrated'; // 原地停留！
+                triggerConfetti(); 
+                playVictorySound();
+                
+                const dot = document.getElementById(`dot-${currentIndex}`);
+                if (dot) {
+                    dot.className = 'w-3.5 h-3.5 rounded-full bg-green-400 border border-green-200 shadow-[0_0_10px_#4ade80]';
+                }
+                currentIndex++; 
+            } 
+            // 狀態 C：已完成 20 題通關，點擊重新開始
+            else if (gameState === 'finished') {
+                currentIndex = 0; 
+                buildDots(); 
+                generatePools(); 
+                setStatic(leftStrip, "Chún-pī"); 
+                setStatic(rightStrip, "Khai-sí"); 
+                currentLeftWord = "Chún-pī";
+                currentRightWord = "Khai-sí";
+                gameState = 'ready'; 
+                handleInteraction(); 
+            }
+        }
+
+        function executeLeftSpinOnly() {
+            if (gameState === 'spinning') return;
+            initAudio();
+            gameState = 'spinning';
+            leftShield.classList.remove('hidden');
+
+            const t1 = currentLeftList[Math.floor(Math.random() * currentLeftList.length)];
+            animateSpin(leftStrip, currentLeftWord, t1, currentLeftList, 1500).then(() => {
+                currentLeftWord = t1;
+                leftShield.classList.add('hidden');
+                gameState = 'waiting'; 
+            });
+        }
+
+        function executeRightSpinOnly() {
+            if (gameState === 'spinning') return;
+            initAudio();
+            gameState = 'spinning';
+            rightShield.classList.remove('hidden');
+
+            const t2 = currentRightList[Math.floor(Math.random() * currentRightList.length)];
+            animateSpin(rightStrip, currentRightWord, t2, currentRightList, 1500).then(() => {
+                currentRightWord = t2;
+                rightShield.classList.add('hidden');
+                gameState = 'waiting'; 
+            });
+        }
+
+        function showEnd() {
+            gameState = 'finished';
+            leftStrip.innerHTML = `<div class="slot-item font-size-fit-special text-green-500 font-bold select-none animate-bounce">Oân-sêng!</div>`;
+            rightStrip.innerHTML = `<div class="slot-item text-5xl md:text-7xl text-yellow-500 select-none animate-bounce">🏆</div>`;
+            triggerConfetti(); setTimeout(triggerConfetti, 500); playVictorySound();
+        }
+
+        // 渲染對照表 (精確控制卡片高度，使其在 100% 高度時不跑版、免滾動)
+        function renderChartGrids() {
+            const leftGrid = document.getElementById('chart-left-grid');
+            const rightGrid = document.getElementById('chart-right-grid');
+            leftGrid.innerHTML = '';
+            rightGrid.innerHTML = '';
+
+            // 聲母格子渲染 (卡片高度微調為自適應 h-11 ~ h-14，文字微調為 text-lg ~ text-2xl)
+            currentLeftList.forEach(letter => {
+                const card = document.createElement('div');
+                card.className = 'bg-amber-100 text-amber-950 font-black text-center py-1 px-1 rounded-xl border-2 border-white shadow-md text-lg sm:text-xl md:text-2xl flex justify-center items-center h-11 sm:h-14 min-w-[50px] transition-all hover:scale-105';
+                card.innerText = letter;
+                leftGrid.appendChild(card);
+            });
+
+            // 鼻化母音格子渲染
+            currentRightList.forEach(letter => {
+                const card = document.createElement('div');
+                card.className = 'bg-sky-100 text-sky-950 font-black text-center py-1 px-1 rounded-xl border-2 border-white shadow-md text-base sm:text-lg md:text-xl flex justify-center items-center h-11 sm:h-14 min-w-[60px] transition-all hover:scale-105';
+                card.innerText = letter;
+                rightGrid.appendChild(card);
+            });
+        }
+
+        function isTyping() {
+            return !settingsPanel.classList.contains('hidden') || 
+                   !chartOverlay.classList.contains('hidden') || 
+                   document.activeElement.tagName === 'INPUT';
+        }
+
+        // 簡報筆/無線滑鼠/鍵盤事件整合
+        window.addEventListener('keydown', e => { 
+            if (isTyping()) return; 
+            if (["PageDown", "PageUp", "ArrowDown", "ArrowUp", "ArrowRight", "ArrowLeft", " ", "Enter"].includes(e.key)) { 
+                e.preventDefault(); 
+                handleInteraction(); 
+            } 
+        });
+
+        // 全螢幕空白處點擊（排除按鈕、方格、齒輪面板與對照表）
+        document.body.addEventListener('click', (e) => {
+            if (isTyping()) return;
+            if (e.target.closest('#settings-panel') || e.target.closest('#settings-toggle-btn') || e.target.closest('input')) return;
+            if (e.target.closest('#left-box') || e.target.closest('#right-box')) return;
+            if (e.target.closest('#dual-spin-btn') || e.target.closest('#chart-toggle-btn') || e.target.closest('#bgm-toggle-btn')) return;
+            handleInteraction();
+        });
+
+        dualSpinBtn.onclick = (e) => { e.stopPropagation(); handleInteraction(); };
+        leftBox.onclick = (e) => { e.stopPropagation(); executeLeftSpinOnly(); };
+        rightBox.onclick = (e) => { e.stopPropagation(); executeRightSpinOnly(); };
+
+        // 對照字表開關
+        document.getElementById('chart-toggle-btn').onclick = (e) => {
+            e.stopPropagation();
+            initAudio();
+            renderChartGrids();
+            chartOverlay.classList.remove('hidden');
+        };
+        document.getElementById('chart-close-btn').onclick = (e) => {
+            e.stopPropagation();
+            chartOverlay.classList.add('hidden');
+        };
+
+        // ⚙️ 編輯面板機制
+        document.getElementById('settings-toggle-btn').onclick = (e) => { 
+            e.stopPropagation(); 
+            settingsPanel.classList.toggle('hidden'); 
+        };
+        settingsPanel.onclick = (e) => e.stopPropagation();
+        
+        document.getElementById('save-settings-btn').onclick = () => {
+            const leftInputs = [...document.querySelectorAll('#left-inputs-container input')].map(i => i.value.trim()).filter(v => v);
+            const rightInputs = [...document.querySelectorAll('#right-inputs-container input')].map(i => i.value.trim()).filter(v => v);
+            
+            if (leftInputs.length === 0 || rightInputs.length === 0) {
+                const err = document.getElementById('error-msg');
+                err.innerText = "❌ 聲母與母音皆必須至少填寫一個項目！";
+                err.classList.remove('hidden');
+                return;
+            }
+            
+            document.getElementById('error-msg').classList.add('hidden');
+            currentLeftList = leftInputs; 
+            currentRightList = rightInputs; 
+            
+            settingsPanel.classList.add('hidden'); 
+            currentIndex = 0; 
+            buildDots(); 
+            generatePools(); 
+            renderChartGrids(); // 儲存時自動重整對照表
+            
+            setStatic(leftStrip, "Chún-pī"); 
+            setStatic(rightStrip, "Khai-sí"); 
+            currentLeftWord = "Chún-pī";
+            currentRightWord = "Khai-sí";
+            gameState = 'ready'; 
+        };
+        
+        // 建立 18 個編輯輸入格
+        function renderInputs(){
+            const lc = document.getElementById('left-inputs-container'), rc = document.getElementById('right-inputs-container');
+            lc.innerHTML = ''; rc.innerHTML = '';
+            for (let i = 0; i < 18; i++) {
+                const i1 = document.createElement('input'); 
+                i1.className = 'w-full bg-slate-900 p-1 rounded text-center text-xs text-white border border-slate-700 focus:outline-none focus:border-amber-400'; 
+                i1.value = currentLeftList[i] || ''; 
+                lc.appendChild(i1);
+                
+                const i2 = document.createElement('input'); 
+                i2.className = 'w-full bg-slate-900 p-1 rounded text-center text-xs text-white border border-slate-700 focus:outline-none focus:border-sky-400'; 
+                i2.value = currentRightList[i] || ''; 
+                rc.appendChild(i2);
+            }
+        }
+        
+        window.onload = function () {
+            renderInputs(); 
+            generatePools(); 
+            buildDots(); 
+            createLEDs();
+            renderChartGrids();
+        }
+    </script>
+</body>
+</html>
