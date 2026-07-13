@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>臺語四種束音（入聲韻尾）發音位置互動解析</title>
+    <!-- 引入 Tailwind CSS 提供精美現代化排版 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts - Inter 與 Noto Sans TC -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Inter', 'Noto Sans TC', sans-serif;
+            scroll-behavior: smooth;
+        }
+        /* 定義發音部位亮起的呼吸動畫 */
+        @keyframes pulse-glow {
+            0%, 100% { r: 12px; opacity: 0.4; }
+            50% { r: 20px; opacity: 0.9; }
+        }
+        .glow-marker {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+        /* 自訂細緻捲軸 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f172a;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col overflow-y-auto selection:bg-indigo-500 selection:text-white">
+
+    <!-- 導覽頁首 -->
+    <header class="border-b border-slate-850 bg-slate-900/80 backdrop-blur sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-tr from-indigo-500 to-rose-500 p-2.5 rounded-xl shadow-lg shadow-indigo-500/20 shrink-0">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-black bg-gradient-to-r from-white via-slate-100 to-indigo-400 bg-clip-text text-transparent">臺語四種束音（入聲韻尾）發音位置</h1>
+                    <p class="text-xs text-slate-400">互動式解剖與語音學微觀數據解析系統</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2 text-xs text-indigo-400 font-semibold bg-slate-900 px-4 py-2 rounded-lg border border-slate-800">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    台語第 4、8 聲專屬入聲
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 核心內容展示區 -->
+    <main id="interactive-section" class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 space-y-8">
+        
+        <!-- 頂部互動面板：分成左右兩大欄，高度適中、圖形放大 -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            <!-- 左側：發音構造與解剖圖 (圖形顯著放大，無下方提示欄阻擋) -->
+            <section class="lg:col-span-6 flex flex-col bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl relative overflow-hidden group">
+                <div class="absolute inset-0 bg-gradient-to-b from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"></div>
+                
+                <div class="flex justify-between items-center mb-4 shrink-0">
+                    <h3 class="text-sm font-bold text-slate-200 flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+                        發音構造與位置示意圖 (側臉朝左)
+                    </h3>
+                    <span class="text-[10px] text-indigo-400 font-bold bg-indigo-950/50 px-2.5 py-1 rounded border border-indigo-900/50">點擊圖中部位切換</span>
+                </div>
+                
+                <!-- 互動式發音器官 SVG：向頂部對齊並調整 ViewBox 向上拉升圖表，徹底解決底部截斷與頂部留白問題 -->
+                <div class="flex-1 flex items-start justify-center pt-1 pb-4">
+                    <svg id="vocal-tract-svg" viewBox="0 35 320 285" class="max-h-[520px] w-full min-h-[380px] h-auto mx-auto object-contain transition-all duration-300">
+                        <!-- 靜態背景：頭部、鼻子、下巴與頸部輪廓 (面朝左) -->
+                        <path d="M 50,50 C 40,65 30,85 30,105 C 30,120 42,125 45,135 M 42,220 C 35,245 28,265 42,285 C 55,300 80,315 110,315 L 120,315" fill="none" stroke="#334155" stroke-width="4" stroke-linecap="round"/>
+                        
+                        <!-- 鼻腔內部通道 (Dashed) -->
+                        <path d="M 60,105 C 80,85 110,75 160,90 C 190,105 200,125 200,125" fill="none" stroke="#475569" stroke-width="2" stroke-dasharray="3,3"/>
+                        
+                        <!-- 上硬顎與後方軟顎固定邊界 (Hard Palate & Soft Palate Base) -->
+                        <path d="M 72,145 C 85,145 105,140 125,135 C 150,125 180,125 200,140" fill="none" stroke="#475569" stroke-width="4" stroke-linecap="round"/>
+                        
+                        <!-- 後咽壁與食道/氣管固定後側邊界 (Pharyngeal Wall) -->
+                        <path d="M 215,145 C 215,175 220,195 220,315" fill="none" stroke="#334155" stroke-width="4"/>
+                        <path d="M 140,245 C 145,265 145,285 145,315" fill="none" stroke="#334155" stroke-width="4"/>
+
+                        <!-- 齒齦標誌線 (Alveolar Ridge Area) -->
+                        <path d="M 72,145 C 80,145 88,143 92,141" fill="none" stroke="#64748b" stroke-width="2"/>
+
+                        <!-- 固定牙齒元件 -->
+                        <!-- 上排門牙 -->
+                        <polygon points="69,145 73,145 71,155" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1" />
+                        <!-- 下排門牙 -->
+                        <polygon points="67,200 71,200 69,190" fill="#cbd5e1" stroke="#94a3b8" stroke-width="1" />
+
+                        <!-- 動態氣流通道指示線 (Airflow representation) -->
+                        <path id="airflow-path" d="M 175,315 C 175,255 170,225 140,205" fill="none" stroke="#38bdf8" stroke-width="3" stroke-dasharray="4,4" class="transition-all duration-500 opacity-80" />
+
+                        <!-- 動態舌頭 (Tongue) - 採用粉紅肉色填充區塊，形變極其逼真 -->
+                        <path id="tongue-path" d="M 74,195 C 90,195 125,185 150,195 C 165,210 160,235 150,245 C 120,245 90,235 74,195 Z" fill="#f43f5e" fill-opacity="0.85" stroke="#e11d48" stroke-width="2" class="transition-all duration-500"/>
+                        
+                        <!-- 動態嘴唇 (Lips) - 上唇與下唇 -->
+                        <path id="upper-lip" d="M 45,135 C 52,135 55,140 58,145" fill="none" stroke="#f43f5e" stroke-width="6" stroke-linecap="round" class="transition-all duration-500"/>
+                        <path id="lower-lip" d="M 42,220 C 50,215 52,210 54,200" fill="none" stroke="#f43f5e" stroke-width="6" stroke-linecap="round" class="transition-all duration-500"/>
+
+                        <!-- 動態軟顎下垂部分 (Velum/Uvula) -->
+                        <path id="soft-palate-path" d="M 200,140 C 205,150 203,165 205,175" fill="none" stroke="#64748b" stroke-width="4" stroke-linecap="round" class="transition-all duration-500"/>
+
+                        <!-- 動態聲帶/聲門 (Glottis) -->
+                        <path id="glottis-left" d="M 165,280 L 172,283" fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round" class="transition-all duration-300"/>
+                        <path id="glottis-right" d="M 185,280 L 178,283" fill="none" stroke="#a855f7" stroke-width="4" stroke-linecap="round" class="transition-all duration-300"/>
+
+                        <!-- 器官結構文字標示 -->
+                        <text x="110" y="80" class="text-[9px] fill-slate-500 font-bold">鼻腔</text>
+                        <text x="110" y="170" class="text-[9px] fill-slate-500 font-bold">口腔</text>
+                        <text x="115" y="125" class="text-[8px] fill-slate-400">硬顎</text>
+                        <text x="170" y="120" class="text-[8px] fill-slate-400">軟顎</text>
+                        <text x="115" y="215" class="text-[9px] fill-rose-200/60 font-bold">舌頭</text>
+                        <text x="195" y="220" class="text-[9px] fill-slate-500 font-bold">咽喉</text>
+
+                        <!-- 各束音發音位置高亮指示點 -->
+                        <!-- -p: 雙唇 -->
+                        <g id="trigger-p" class="cursor-pointer group/spot" onclick="selectConsonant('p')">
+                            <circle cx="56" cy="172" r="14" class="fill-rose-500/10 stroke-rose-500/20 group-hover/spot:stroke-rose-500/50 transition-all" />
+                            <circle id="marker-p" cx="56" cy="172" r="5" class="fill-rose-500 transition-all duration-300" />
+                            <circle id="pulse-p" cx="56" cy="172" r="12" class="fill-none stroke-rose-500 glow-marker hidden" stroke-width="2"/>
+                            <text x="18" y="152" class="text-[10px] font-bold fill-rose-400 group-hover/spot:fill-rose-300 transition-colors pointer-events-none">-p (雙唇)</text>
+                        </g>
+
+                        <!-- -t: 舌尖齒齦 -->
+                        <g id="trigger-t" class="cursor-pointer group/spot" onclick="selectConsonant('t')">
+                            <circle cx="90" cy="142" r="14" class="fill-emerald-500/10 stroke-emerald-500/20 group-hover/spot:stroke-emerald-500/50 transition-all" />
+                            <circle id="marker-t" cx="90" cy="142" r="5" class="fill-emerald-500 transition-all duration-300" />
+                            <circle id="pulse-t" cx="90" cy="142" r="12" class="fill-none stroke-emerald-500 glow-marker hidden" stroke-width="2"/>
+                            <text x="75" y="125" class="text-[10px] font-bold fill-emerald-400 group-hover/spot:fill-emerald-300 transition-colors pointer-events-none">-t (齒齦)</text>
+                        </g>
+
+                        <!-- -k: 舌根軟顎 -->
+                        <g id="trigger-k" class="cursor-pointer group/spot" onclick="selectConsonant('k')">
+                            <circle cx="165" cy="132" r="14" class="fill-cyan-500/10 stroke-cyan-500/20 group-hover/spot:stroke-cyan-500/50 transition-all" />
+                            <circle id="marker-k" cx="165" cy="132" r="5" class="fill-cyan-500 transition-all duration-300" />
+                            <circle id="pulse-k" cx="165" cy="132" r="12" class="fill-none stroke-cyan-500 glow-marker hidden" stroke-width="2"/>
+                            <text x="155" y="112" class="text-[10px] font-bold fill-cyan-400 group-hover/spot:fill-cyan-300 transition-colors pointer-events-none">-k (軟顎)</text>
+                        </g>
+
+                        <!-- -h: 聲門喉塞 -->
+                        <g id="trigger-h" class="cursor-pointer group/spot" onclick="selectConsonant('h')">
+                            <circle cx="174" cy="282" r="14" class="fill-amber-500/10 stroke-amber-500/20 group-hover/spot:stroke-amber-500/50 transition-all" />
+                            <circle id="marker-h" cx="174" cy="282" r="5" class="fill-amber-500 transition-all duration-300" />
+                            <circle id="pulse-h" cx="174" cy="282" r="12" class="fill-none stroke-amber-500 glow-marker hidden" stroke-width="2"/>
+                            <text x="192" y="286" class="text-[10px] font-bold fill-amber-400 group-hover/spot:fill-amber-300 transition-colors pointer-events-none">-h (聲門)</text>
+                        </g>
+                    </svg>
+                </div>
+            </section>
+
+            <!-- 右側：四大按鈕切換與詳細解析面板 (佔 6 格) -->
+            <section class="lg:col-span-6 flex flex-col gap-4">
+                
+                <!-- 四大束音快速切換按鈕組 -->
+                <div class="grid grid-cols-4 gap-3 shrink-0">
+                    <!-- 按鈕 -p -->
+                    <button onclick="selectConsonant('p')" id="card-p" class="flex flex-col items-center p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-rose-500/50 transition-all text-left w-full group relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-rose-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300"></div>
+                        <span class="text-2xl font-black text-rose-400">-p</span>
+                        <span class="text-xs font-semibold text-slate-200 mt-1">雙唇 [p̚]</span>
+                        <span class="text-[10px] text-slate-450 mt-1">汁 / 溼 / 答</span>
+                    </button>
+
+                    <!-- 按鈕 -t -->
+                    <button onclick="selectConsonant('t')" id="card-t" class="flex flex-col items-center p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-emerald-500/50 transition-all text-left w-full group relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-emerald-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300"></div>
+                        <span class="text-2xl font-black text-emerald-400">-t</span>
+                        <span class="text-xs font-semibold text-slate-200 mt-1">舌尖 [t̚]</span>
+                        <span class="text-[10px] text-slate-450 mt-1">八 / 結 / 漆</span>
+                    </button>
+
+                    <!-- 按鈕 -k -->
+                    <button onclick="selectConsonant('k')" id="card-k" class="flex flex-col items-center p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-cyan-500/50 transition-all text-left w-full group relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-cyan-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300"></div>
+                        <span class="text-2xl font-black text-cyan-400">-k</span>
+                        <span class="text-xs font-semibold text-slate-200 mt-1">舌根 [k̚]</span>
+                        <span class="text-[10px] text-slate-450 mt-1">國 / 讀 / 腹</span>
+                    </button>
+
+                    <!-- 按鈕 -h -->
+                    <button onclick="selectConsonant('h')" id="card-h" class="flex flex-col items-center p-3.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-900 hover:border-amber-500/50 transition-all text-left w-full group relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-1.5 h-full bg-amber-500 scale-y-0 group-hover:scale-y-100 transition-transform origin-top duration-300"></div>
+                        <span class="text-2xl font-black text-amber-400">-h</span>
+                        <span class="text-xs font-semibold text-slate-200 mt-1">聲門 [ʔ]</span>
+                        <span class="text-[10px] text-slate-450 mt-1">肉 / 鴨 / 鐵</span>
+                    </button>
+                </div>
+
+                <!-- 詳細解析主體：高度自適應，空間更為開闊 -->
+                <div class="flex-1 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-6 shadow-xl relative flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                    
+                    <div id="detail-pane" class="space-y-5">
+                        <!-- 韻尾基本名詞 -->
+                        <div class="flex items-center justify-between border-b border-slate-800/80 pb-3">
+                            <div class="flex items-center gap-3">
+                                <span id="detail-symbol" class="text-4xl font-black text-slate-100">--</span>
+                                <span id="detail-ipa" class="text-sm font-mono text-slate-400 bg-slate-900 px-2.5 py-1 rounded border border-slate-800"></span>
+                            </div>
+                            <h4 id="detail-name" class="text-xs text-slate-400 font-medium"></h4>
+                        </div>
+
+                        <!-- 兩大核心維度卡片 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- 位置與嘴型 -->
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1">
+                                <span class="text-[10px] text-slate-500 block font-bold tracking-wider uppercase">發音位置與嘴型舌位</span>
+                                <div id="detail-position" class="text-slate-100 font-bold text-sm">--</div>
+                                <div id="detail-mouth" class="text-slate-300 text-xs mt-1.5 leading-relaxed">--</div>
+                            </div>
+
+                            <!-- 聲學特色與氣流 -->
+                            <div class="bg-slate-950/60 p-4 rounded-xl border border-slate-800/80 space-y-1">
+                                <span class="text-[10px] text-slate-500 block font-bold tracking-wider uppercase">聲學特徵與送氣狀態</span>
+                                <div id="detail-features" class="text-slate-100 font-bold text-sm">--</div>
+                                <div id="detail-aspiration" class="text-slate-300 text-xs mt-1.5 leading-relaxed">--</div>
+                            </div>
+                        </div>
+
+                        <!-- 經典台語字例 -->
+                        <div>
+                            <span class="text-[10px] text-slate-500 block font-bold tracking-wider mb-2.5 uppercase">經典台語字例對比</span>
+                            <div class="grid grid-cols-3 gap-3" id="word-container">
+                                <!-- JS將在此處動態注入字卡 -->
+                            </div>
+                        </div>
+
+                        <!-- 語言學學術解析提示 -->
+                        <div class="p-4 rounded-xl bg-slate-950/40 border border-slate-800/50 text-xs text-slate-400 space-y-1.5">
+                            <div class="font-bold text-indigo-400 flex items-center gap-1.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                語言學深層解析 (Linguistic Note)
+                            </div>
+                            <p id="detail-linguistic" class="leading-relaxed"></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- 分割導引線：引導滑動 -->
+        <div class="pt-8 flex flex-col items-center justify-center text-center gap-2">
+            <div class="w-0.5 h-16 bg-gradient-to-b from-indigo-500 to-transparent"></div>
+            <h3 class="text-base font-bold text-slate-200 mt-2">臺語四種束音韻尾對照數據總表</h3>
+            <p class="text-xs text-slate-400">往下滑動可看完整對比發音位置、舌位變化與物理特色</p>
+        </div>
+
+        <!-- 下方對照數據總表 (直觀一體化佈局) -->
+        <div id="table-section" class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl">
+            <div class="px-6 py-4 border-b border-slate-800 bg-slate-900/50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                <div>
+                    <h3 class="text-sm font-bold text-slate-200">束音韻尾（對照數據總表）</h3>
+                    <p class="text-[10px] text-slate-400">總覽對比發音位置、舌位變化與物理特色，點擊列可返回頂部剖析對應發音</p>
+                </div>
+                <div class="text-[10px] text-indigo-400 font-semibold bg-indigo-950/50 px-3 py-1 rounded-full border border-indigo-900/50">
+                    國際音標 [p̚] [t̚] [k̚] [ʔ] 均為「唯閉音（無放音）」
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs min-w-[700px]">
+                    <thead class="bg-slate-950 text-slate-400 uppercase tracking-wider sticky top-0 z-10">
+                        <tr>
+                            <th class="px-6 py-4 border-b border-slate-800">束音符號</th>
+                            <th class="px-6 py-4 border-b border-slate-800">發音位置</th>
+                            <th class="px-6 py-4 border-b border-slate-800">嘴型與舌位</th>
+                            <th class="px-6 py-4 border-b border-slate-800">發音特色</th>
+                            <th class="px-6 py-4 border-b border-slate-800">是否送氣</th>
+                            <th class="px-6 py-4 border-b border-slate-800">經典字例</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-850">
+                        <!-- -p -->
+                        <tr class="hover:bg-slate-950/60 transition-colors cursor-pointer group" onclick="scrollToInteractive('p')">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-lg font-black text-rose-400">-p</span>
+                                <span class="text-[10px] font-mono text-slate-500 block">[p̚] 雙唇入聲</span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-slate-200">雙唇</td>
+                            <td class="px-6 py-4 text-slate-300">嘴唇迅速閉合</td>
+                            <td class="px-6 py-4 text-slate-300">收音於雙唇，不爆破、不拖音</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-slate-950 text-slate-400 border border-slate-800">不送氣</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-400">
+                                汁 (<span class="text-rose-400 font-mono">tsap</span>), 溼 (<span class="text-rose-400 font-mono">sip</span>), 答 (<span class="text-rose-400 font-mono">tap</span>)
+                                <span class="inline-block ml-2 text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">點選剖析 ↑</span>
+                            </td>
+                        </tr>
+                        <!-- -t -->
+                        <tr class="hover:bg-slate-950/60 transition-colors cursor-pointer group" onclick="scrollToInteractive('t')">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-lg font-black text-emerald-400">-t</span>
+                                <span class="text-[10px] font-mono text-slate-500 block">[t̚] 舌尖入聲</span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-slate-200">舌尖抵上齒齦</td>
+                            <td class="px-6 py-4 text-slate-300">舌尖頂住上齒齦</td>
+                            <td class="px-6 py-4 text-slate-300">收音於舌尖，不爆破、不拖音</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-slate-950 text-slate-400 border border-slate-800">不送氣</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-400">
+                                八 (<span class="text-emerald-400 font-mono">pat</span>), 結 (<span class="text-emerald-400 font-mono">kiat</span>), 漆 (<span class="text-emerald-400 font-mono">tshat</span>)
+                                <span class="inline-block ml-2 text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">點選剖析 ↑</span>
+                            </td>
+                        </tr>
+                        <!-- -k -->
+                        <tr class="hover:bg-slate-950/60 transition-colors cursor-pointer group" onclick="scrollToInteractive('k')">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-lg font-black text-cyan-400">-k</span>
+                                <span class="text-[10px] font-mono text-slate-500 block">[k̚] 舌根入聲</span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-slate-200">舌根抵軟顎</td>
+                            <td class="px-6 py-4 text-slate-300">舌根向後貼住軟顎</td>
+                            <td class="px-6 py-4 text-slate-300">收音於舌根，不爆破、不拖音</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-slate-950 text-slate-400 border border-slate-800">不送氣</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-400">
+                                國 (<span class="text-cyan-400 font-mono">kok</span>), 讀 (<span class="text-cyan-400 font-mono">tha̍k</span>), 腹 (<span class="text-cyan-400 font-mono">pak</span>)
+                                <span class="inline-block ml-2 text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">點選剖析 ↑</span>
+                            </td>
+                        </tr>
+                        <!-- -h -->
+                        <tr class="hover:bg-slate-950/60 transition-colors cursor-pointer group" onclick="scrollToInteractive('h')">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="text-lg font-black text-amber-400">-h</span>
+                                <span class="text-[10px] font-mono text-slate-500 block">[ʔ] 喉塞音</span>
+                            </td>
+                            <td class="px-6 py-4 font-semibold text-slate-200">聲門</td>
+                            <td class="px-6 py-4 text-slate-300">聲門（喉頭）關閉</td>
+                            <td class="px-6 py-4 text-slate-300">氣流突然停止，喉塞音，不是摩擦音 [h]</td>
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-0.5 rounded text-[10px] bg-amber-950/50 text-amber-300 border border-amber-900/40">無送氣 (喉塞音)</span>
+                            </td>
+                            <td class="px-6 py-4 text-slate-400">
+                                肉 (<span class="text-amber-400 font-mono">bah</span>), 鴨 (<span class="text-amber-400 font-mono">ah</span>), 鐵 (<span class="text-amber-400 font-mono">thih</span>)
+                                <span class="inline-block ml-2 text-[10px] text-indigo-400 opacity-0 group-hover:opacity-100 transition-opacity">點選剖析 ↑</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- 頁尾 -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-500">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p>© 2026 臺語語音學互動教學系統. 專為台語入聲與唯閉音教育而設計。</p>
+            <p class="text-[10px] text-slate-600">本系統採用高品質向量解剖形變演算，提供精準發音器官特寫對照。</p>
+        </div>
+    </footer>
+
+    <script>
+        // 核心發音解剖學數據庫
+        const consonantData = {
+            p: {
+                symbol: "-p",
+                name: "雙唇入聲韻尾 (Bilabial Stop Final)",
+                ipa: "[p̚]",
+                position: "雙唇 (Lips)",
+                mouth: "上唇與下唇在發音尾聲迅速閉合，將通道切斷。",
+                features: "收音於雙唇，不爆破、不拖音。氣流完全在雙唇受阻。",
+                aspiration: "不送氣。這是一種無聲放音（Unreleased）的塞音韻尾。",
+                linguistic: "在台語中，[-p] 尾音（如「汁 tsap」）會迫使說話者迅速緊閉雙唇。與華語不同，台語完整保留了古漢語入聲，在雙唇緊閉的那一瞬間便戛然而止，絕對不能發出「p」的爆破音。",
+                words: [
+                    { char: "汁", roman: "tsap", meaning: "果汁 / 湯汁" },
+                    { char: "溼", roman: "sip", meaning: "潮濕" },
+                    { char: "答", roman: "tap", meaning: "回答" }
+                ],
+                tonguePath: "M 74,195 C 90,195 125,185 150,195 C 165,210 160,235 150,245 C 120,245 90,235 74,195 Z", // 舌頭平放
+                upperLipPath: "M 45,135 C 50,145 52,155 54,166", // 上唇閉合
+                lowerLipPath: "M 42,220 C 48,205 50,190 54,166", // 下唇閉合
+                softPalatePath: "M 200,140 C 205,150 203,165 205,175", // 軟顎正常
+                glottisLeft: "M 165,278 L 172,283", 
+                glottisRight: "M 185,278 L 178,283",
+                airflowPath: "M 175,315 C 175,255 170,225 140,205 C 110,195 85,185 58,168", // 氣流導向雙唇
+                color: "rose"
+            },
+            t: {
+                symbol: "-t",
+                name: "舌尖齒齦入聲韻尾 (Alveolar Stop Final)",
+                ipa: "[t̚]",
+                position: "舌尖抵上齒齦 (Alveolar Ridge)",
+                mouth: "舌尖頂住上門牙後方的硬組織（齒齦），封鎖口腔氣流。",
+                features: "收音於舌尖，不爆破、不拖音。氣流在舌尖與齒齦間受阻。",
+                aspiration: "不送氣。舌尖與齒齦緊密接觸，音節終止，不釋放氣流。",
+                linguistic: "發 [-t] 尾音（如「八 pat」）時，雙唇維持微張，但氣流會因「舌尖頂死上齒齦」而瞬間阻絕。絕對不能像英文「cat」一樣在尾端釋放出任何「t」的送氣聲。",
+                words: [
+                    { char: "八", roman: "pat", meaning: "數字 8" },
+                    { char: "結", roman: "kiat", meaning: "結伴 / 結束" },
+                    { char: "漆", roman: "tshat", meaning: "油漆" }
+                ],
+                tonguePath: "M 74,195 C 80,165 82,143 88,142 C 125,160 150,195 150,195 C 165,210 160,235 150,245 C 120,245 90,235 74,195 Z", // 舌尖上頂
+                upperLipPath: "M 45,135 C 52,135 55,140 58,145", // 嘴唇微張
+                lowerLipPath: "M 42,220 C 50,215 52,210 54,200", 
+                softPalatePath: "M 200,140 C 205,150 203,165 205,175", 
+                glottisLeft: "M 165,278 L 172,283", 
+                glottisRight: "M 185,278 L 178,283",
+                airflowPath: "M 175,315 C 175,255 170,225 140,205 C 115,190 95,170 88,145", // 氣流終止於上齒齦
+                color: "emerald"
+            },
+            k: {
+                symbol: "-k",
+                name: "舌根軟顎入聲韻尾 (Velar Stop Final)",
+                ipa: "[k̚]",
+                position: "舌根抵軟顎 (Velum / Soft Palate)",
+                mouth: "舌後部（舌根）高高拱起，緊貼口腔最深處的軟顎，斷開氣流。",
+                features: "收音於舌根，不爆破、不拖音。氣流在深處軟顎被阻隔。",
+                aspiration: "不送氣。屬於軟顎無聲放音入聲韻尾。",
+                linguistic: "發 [-k] 尾音（如「國 kok」）時，發音阻礙點位於最深處。發音時舌後部與軟顎緊貼不放，形成一個封閉空間。該音在聽感上易與喉塞音「-h」混淆，但發 [-k] 時舌根會明顯抬起頂住上方軟黏部位。",
+                words: [
+                    { char: "國", roman: "kok", meaning: "國家" },
+                    { char: "讀", roman: "tha̍k", meaning: "閱讀 / 念書" },
+                    { char: "腹", roman: "pak", meaning: "肚子" }
+                ],
+                tonguePath: "M 74,195 C 90,195 130,165 160,135 C 175,150 165,235 150,245 C 120,245 90,235 74,195 Z", // 舌後高拱
+                upperLipPath: "M 45,135 C 52,135 55,140 58,145", 
+                lowerLipPath: "M 42,220 C 50,215 52,210 54,200", 
+                softPalatePath: "M 200,140 C 185,145 172,138 165,134", // 軟顎貼緊舌根
+                glottisLeft: "M 165,278 L 172,283", 
+                glottisRight: "M 185,278 L 178,283",
+                airflowPath: "M 175,315 C 175,255 170,225 160,145", // 氣流終止於軟顎
+                color: "cyan"
+            },
+            h: {
+                symbol: "-h",
+                name: "聲門喉塞入聲韻尾 (Glottal Stop Final)",
+                ipa: "[ʔ]",
+                position: "聲門 (Glottis / Larynx)",
+                mouth: "喉嚨內兩條聲帶迅速併攏、完全合上，瞬間切斷肺部氣流。",
+                features: "氣流突然停止。喉塞音是突然關閉聲門產生的，與舌、唇運動無關。",
+                aspiration: "無送氣（喉塞音）。它並不是摩擦音 [h]，而是發音戛然而止的物理機制。",
+                linguistic: "[-h] 為「喉塞音」（如「肉 bah」）。它的口腔和舌頭完全維持前方母音的放鬆姿態（不閉嘴、不頂舌），純粹在「喉頭深處猛踩煞車」將聲門緊閉。這也是台語入聲中出現頻率最高、最靈活的韻尾。",
+                words: [
+                    { char: "肉", roman: "bah", meaning: "豬肉 / 肌肉" },
+                    { char: "鴨", roman: "ah", meaning: "水鴨" },
+                    { char: "鐵", roman: "thih", meaning: "鋼鐵" }
+                ],
+                tonguePath: "M 74,195 C 90,195 125,185 150,195 C 165,210 160,235 150,245 C 120,245 90,235 74,195 Z", // 舌頭平躺放鬆
+                upperLipPath: "M 45,135 C 52,135 55,140 58,145", 
+                lowerLipPath: "M 42,220 C 50,215 52,210 54,200", 
+                softPalatePath: "M 200,140 C 205,150 203,165 205,175", 
+                glottisLeft: "M 165,282 L 175,282", // 左右聲帶緊貼閉合
+                glottisRight: "M 185,282 L 175,282",
+                airflowPath: "M 175,315 L 175,285", // 氣流在聲門底即被截斷
+                color: "amber"
+            }
+        };
+
+        let currentActive = null;
+
+        /**
+         * 選擇特定的束音韻尾
+         * @param {string} consonantId - 'p', 't', 'k', 'h' 中的一個
+         */
+        function selectConsonant(consonantId) {
+            const data = consonantData[consonantId];
+            if (!data) return;
+
+            currentActive = consonantId;
+
+            // 1. 更新四大快捷按鈕卡片選取狀態
+            ['p', 't', 'k', 'h'].forEach(id => {
+                const card = document.getElementById(`card-${id}`);
+                const pulse = document.getElementById(`pulse-${id}`);
+                const marker = document.getElementById(`marker-${id}`);
+                
+                if (id === consonantId) {
+                    card.className = card.className.replace(/border-slate-800/g, `border-${data.color}-500 bg-slate-900`);
+                    card.classList.add('ring-2', `ring-${data.color}-500/30`);
+                    pulse.classList.remove('hidden');
+                    marker.classList.add('scale-150');
+                } else {
+                    card.className = card.className.replace(new RegExp(`border-${consonantData[id].color}-500`, 'g'), 'border-slate-800');
+                    card.classList.remove('ring-2', `ring-${consonantData[id].color}-500/30`);
+                    pulse.classList.add('hidden');
+                    marker.classList.remove('scale-150');
+                }
+            });
+
+            // 2. 形變發音器官 SVG 通道 (動態切換)
+            const tongue = document.getElementById('tongue-path');
+            const upperLip = document.getElementById('upper-lip');
+            const lowerLip = document.getElementById('lower-lip');
+            const softPalate = document.getElementById('soft-palate-path');
+            const glottisL = document.getElementById('glottis-left');
+            const glottisR = document.getElementById('glottis-right');
+            const airflow = document.getElementById('airflow-path');
+
+            tongue.setAttribute('d', data.tonguePath);
+            upperLip.setAttribute('d', data.upperLipPath);
+            lowerLip.setAttribute('d', data.lowerLipPath);
+            softPalate.setAttribute('d', data.softPalatePath);
+            glottisL.setAttribute('d', data.glottisLeft);
+            glottisR.setAttribute('d', data.glottisRight);
+            airflow.setAttribute('d', data.airflowPath);
+
+            // 3. 渲染右側詳細說明板塊
+            document.getElementById('detail-symbol').textContent = data.symbol;
+            document.getElementById('detail-symbol').className = `text-4xl font-black text-${data.color}-400`;
+            document.getElementById('detail-ipa').textContent = data.ipa;
+            document.getElementById('detail-ipa').className = `text-sm font-mono text-${data.color}-300 bg-slate-900 px-2.5 py-1 rounded border border-${data.color}-900/40`;
+            document.getElementById('detail-name').textContent = data.name;
+            document.getElementById('detail-position').textContent = data.position;
+            document.getElementById('detail-mouth').textContent = data.mouth;
+            document.getElementById('detail-features').textContent = data.features;
+            document.getElementById('detail-aspiration').textContent = data.aspiration;
+            document.getElementById('detail-linguistic').innerHTML = data.linguistic;
+
+            // 4. 動態注入字例卡片
+            const container = document.getElementById('word-container');
+            container.innerHTML = '';
+            data.words.forEach(w => {
+                const card = document.createElement('div');
+                card.className = "p-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800/80 transition-all flex flex-col items-center justify-center cursor-default group/word relative overflow-hidden";
+                card.innerHTML = `
+                    <span class="text-2xl font-black text-slate-100 group-hover/word:text-${data.color}-400 transition-colors">${w.char}</span>
+                    <span class="text-xs font-mono text-${data.color}-400 mt-1">${w.roman}</span>
+                    <span class="text-[10px] text-slate-500 mt-0.5">${w.meaning}</span>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        /**
+         * 當點選表格列時，自動選擇對應發音並以平滑動畫回滾到頂部互動區
+         * @param {string} consonantId - 'p', 't', 'k', 'h'
+         */
+        function scrollToInteractive(consonantId) {
+            selectConsonant(consonantId);
+            const targetElement = document.getElementById('interactive-section');
+            if (targetElement) {
+                targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 頁面初次載入預設選取 "-p"
+        window.onload = function() {
+            setTimeout(() => {
+                selectConsonant('p');
+            }, 50);
+        };
+    </script>
+</body>
+</html>
