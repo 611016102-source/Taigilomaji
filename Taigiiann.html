@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kin-á-ji̍t hó jī-ūn.</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/@fontsource/iansui@5.2.8/index.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Iansui', 'Klee One', 'Segoe UI', sans-serif;
+            background-color: #fcf9f2;
+            background-image: radial-gradient(#eadeca 1px, transparent 1px);
+            background-size: 20px 20px;
+            cursor: pointer;
+        }
+        
+        h1, h2, p, button, div, span {
+            font-family: 'Iansui', 'Klee One', 'Segoe UI', sans-serif;
+        }
+        
+        .wheel-shadow {
+            box-shadow: 0 15px 35px rgba(139, 22, 16, 0.25), 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .custom-popup-shadow {
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+        }
+
+        .no-select {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+    </style>
+</head>
+<body class="h-screen h-[100dvh] w-full flex flex-col items-center justify-between py-4 sm:py-6 px-4 no-select relative overflow-hidden">
+
+    <!-- Control Buttons (Sound & Settings) -->
+    <div class="absolute top-4 right-4 sm:top-6 sm:right-6 z-30 flex items-center gap-2 sm:gap-3">
+        <button id="settings-btn" class="p-3 bg-white/90 border border-[#eadeca] hover:bg-white rounded-full shadow-md transition-all active:scale-95 cursor-pointer" title="Settings / 學生名單">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#8c110b" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.325.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 011.37.49l1.296 2.247a1.125 1.125 0 01-.26 1.431l-1.003.827c-.293.241-.438.613-.43.992a7.723 7.723 0 010 .255c-.008.378.137.75.43.991l1.004.827c.424.35.534.955.26 1.43l-1.298 2.247a1.125 1.125 0 01-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 01-.22.128c-.331.183-.581.495-.644.869l-.213 1.281c-.09.543-.56.94-1.11.94h-2.594c-.55 0-1.019-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 01-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 01-1.369-.49l-1.297-2.247a1.125 1.125 0 01.26-1.431l1.004-.827c.292-.24.437-.613.43-.991a6.932 6.932 0 010-.255c.007-.38-.138-.751-.43-.992l-1.004-.827a1.125 1.125 0 01-.26-1.43l1.297-2.247a1.125 1.125 0 011.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.086.22-.128.332-.183.582-.495.644-.869l.214-1.281z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
+
+        <button id="mute-btn" class="p-3 bg-white/90 border border-[#eadeca] hover:bg-white rounded-full shadow-md transition-all active:scale-95 cursor-pointer" title="Toggle Sound">
+            <svg id="speaker-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#b81d13" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Celebration Animation Canvas -->
+    <canvas id="fx-canvas" class="pointer-events-none fixed inset-0 z-40 hidden"></canvas>
+
+    <!-- Header Title (Placed top-left to avoid overlap with the wheel pointer) -->
+    <header class="absolute top-4 left-4 sm:top-6 sm:left-6 z-30 pointer-events-none">
+        <h1 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#b81d13] tracking-wide drop-shadow-sm">
+            Kin-á-ji̍t hó jī-ūn.
+        </h1>
+    </header>
+
+    <main class="w-full flex flex-col items-center justify-center my-auto relative">
+        <div id="wheel-container" class="relative w-[320px] h-[320px] sm:w-[460px] sm:h-[460px] md:w-[580px] md:h-[580px] lg:w-[660px] lg:h-[660px] max-w-[78vh] max-h-[78vh] aspect-square z-10 transition-transform duration-150">
+            <!-- Golden Pointer -->
+            <div class="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-10 sm:w-10 sm:h-12 z-20 drop-shadow-md">
+                <svg viewBox="0 0 30 35" class="w-full h-full">
+                    <polygon points="0,0 30,0 15,35" fill="#f4c430" stroke="#8c110b" stroke-width="3"/>
+                </svg>
+            </div>
+            
+            <!-- Wheel Canvas -->
+            <canvas id="wheel" class="w-full h-full rounded-full border-[8px] border-[#8c110b] wheel-shadow bg-white"></canvas>
+        </div>
+    </main>
+
+    <!-- Dimmer Overlay -->
+    <div id="overlay" class="hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity duration-300"></div>
+    
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl p-6 sm:p-7 custom-popup-shadow z-50 w-[92%] max-w-[480px] border-4 border-[#f4c430] flex flex-col max-h-[85vh]">
+        <div class="flex items-center justify-between pb-3 border-b border-amber-200 mb-4">
+            <h3 class="text-xl sm:text-2xl font-bold text-[#8c110b]">Ha̍k-seng Se̍k-tiāⁿ (設定名單)</h3>
+            <button id="close-settings-btn" class="text-gray-400 hover:text-gray-700 text-2xl font-bold px-2 cursor-pointer">&times;</button>
+        </div>
+
+        <!-- Add Student Input Box -->
+        <form id="add-student-form" class="flex gap-2 mb-4">
+            <input type="text" id="new-student-input" placeholder="輸入學生名字 (如: A-ming)" class="flex-1 px-4 py-2 border border-amber-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#f4c430] text-gray-800">
+            <button type="submit" class="bg-[#8c110b] hover:bg-[#b81d13] text-white px-4 py-2 rounded-xl font-bold text-sm shadow transition-all cursor-pointer">
+                + 加1位
+            </button>
+        </form>
+
+        <!-- Student List Container -->
+        <div class="text-xs text-gray-500 mb-2 flex justify-between items-center">
+            <span>目前共 <span id="student-count" class="font-bold text-[#8c110b]">12</span> 位學生：</span>
+            <span>點擊 🗑️ 可刪除</span>
+        </div>
+        <div id="student-list" class="overflow-y-auto flex-1 pr-1 space-y-2 max-h-[260px]">
+            <!-- Dynamically populated -->
+        </div>
+
+        <div class="mt-5 pt-3 border-t border-amber-200 flex justify-end">
+            <button id="save-settings-btn" class="bg-[#f4c430] hover:bg-amber-400 text-[#8c110b] font-extrabold px-6 py-2.5 rounded-xl shadow transition-all cursor-pointer">
+                完成 (Sêng-kông)
+            </button>
+        </div>
+    </div>
+
+    <!-- Congratulations Popup -->
+    <div id="result-popup" class="hidden fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-3xl p-6 sm:p-8 custom-popup-shadow text-center z-50 w-[92%] max-w-[460px] border-4 border-[#f4c430] transform scale-95 transition-transform duration-300">
+        <div class="text-4xl sm:text-5xl mb-2 sm:mb-3 animate-bounce">🎉 🌟 🎉</div>
+        
+        <!-- Single Line Title -->
+        <h2 class="text-2xl sm:text-3xl md:text-4xl font-extrabold text-[#b81d13] mb-4 sm:mb-6 tracking-wide whitespace-nowrap">
+            Lí siōng hó-ūn!
+        </h2>
+        
+        <!-- Winner Name Display Box -->
+        <div class="bg-[#fffdf2] border-2 border-dashed border-[#f4c430] rounded-2xl py-5 sm:py-6 px-4 shadow-inner">
+            <div id="winner-name" class="text-3xl md:text-4xl font-black text-gray-800 tracking-wide">---</div>
+        </div>
+    </div>
+
+    <script>
+        let names = [
+            "E̍k-tián", "E̍k-hiân", "Ài-lī", "Péng-iûⁿ",
+            "Phài-sîn", "A-Koai", "A-chhong", "Têng-seng",
+            "Phû-goa̍t", "Su-oân", "Tông-lo̍k", "A-seng"
+        ];
+
+        // Track unselected student indices to guarantee non-repeating draws per round
+        let availableIndices = [];
+
+        function resetAvailableIndices() {
+            availableIndices = Array.from({ length: names.length }, (_, i) => i);
+        }
+
+        // Initialize candidate pool
+        resetAvailableIndices();
+
+        let numSlices = names.length;
+        let sliceAngle = (2 * Math.PI) / numSlices;
+
+        const sliceColors = [
+            '#e63946', '#f4a261', '#e76f51', '#2a9d8f',
+            '#457b9d', '#e07a5f', '#81b29a', '#f2cc8f'
+        ];
+
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const popup = document.getElementById('result-popup');
+        const overlay = document.getElementById('overlay');
+        const winnerNameText = document.getElementById('winner-name');
+        const muteBtn = document.getElementById('mute-btn');
+        const speakerIcon = document.getElementById('speaker-icon');
+
+        // Settings Elements
+        const settingsBtn = document.getElementById('settings-btn');
+        const settingsModal = document.getElementById('settings-modal');
+        const closeSettingsBtn = document.getElementById('close-settings-btn');
+        const saveSettingsBtn = document.getElementById('save-settings-btn');
+        const addStudentForm = document.getElementById('add-student-form');
+        const newStudentInput = document.getElementById('new-student-input');
+        const studentListContainer = document.getElementById('student-list');
+        const studentCountEl = document.getElementById('student-count');
+        
+        // Effects Canvas
+        const fxCanvas = document.getElementById('fx-canvas');
+        const fxCtx = fxCanvas.getContext('2d');
+        let particles = [];
+        let fxActive = false;
+
+        let currentRotation = 0;
+        let spinState = 'IDLE'; 
+        let currentSpeed = 0; 
+        let stopStartTime = 0;
+        let stopStartRotation = 0;
+        let stopTargetRotation = 0;
+        const stopDuration = 2200;
+
+        const size = 1000;
+        canvas.width = size;
+        canvas.height = size;
+        const center = size / 2;
+        const radius = center - 15;
+
+        function resizeFx() {
+            fxCanvas.width = window.innerWidth;
+            fxCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeFx);
+        resizeFx();
+
+        function updateSliceInfo() {
+            numSlices = names.length;
+            sliceAngle = (2 * Math.PI) / (numSlices || 1);
+        }
+
+        function drawWheel() {
+            updateSliceInfo();
+            ctx.clearRect(0, 0, size, size);
+
+            if (numSlices === 0) {
+                ctx.save();
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#8c110b';
+                ctx.font = 'bold 36px "Iansui", "Klee One", sans-serif';
+                ctx.fillText('請新增學生名單', center, center);
+                ctx.restore();
+                return;
+            }
+
+            for (let i = 0; i < numSlices; i++) {
+                const startAngle = i * sliceAngle - Math.PI / 2;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = sliceColors[i % sliceColors.length];
+                ctx.fill();
+                
+                ctx.lineWidth = 4;
+                ctx.strokeStyle = '#ffffff';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.textAlign = 'right';
+                ctx.textBaseline = 'middle';
+                ctx.fillStyle = '#ffffff';
+                
+                // Adjust font size dynamically if there are many slices
+                const fontSize = numSlices > 16 ? 32 : (numSlices > 12 ? 38 : 42);
+                ctx.font = `bold ${fontSize}px "Iansui", "Klee One", "Segoe UI", sans-serif`;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.4)';
+                ctx.shadowBlur = 4;
+                
+                ctx.fillText(names[i], radius - 45, 0);
+                ctx.restore();
+            }
+
+            // Center golden decorative pivot
+            ctx.beginPath();
+            ctx.arc(center, center, 45, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.lineWidth = 6;
+            ctx.strokeStyle = '#f4c430';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(center, center, 18, 0, 2 * Math.PI);
+            ctx.fillStyle = '#8c110b';
+            ctx.fill();
+        }
+
+        function renderSettingsList() {
+            studentCountEl.textContent = names.length;
+            studentListContainer.innerHTML = '';
+
+            names.forEach((name, index) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center justify-between bg-amber-50/60 border border-amber-200 px-3 py-2 rounded-xl text-gray-800';
+                item.innerHTML = `
+                    <span class="font-bold text-sm">${index + 1}. ${name}</span>
+                    <button class="delete-btn text-red-500 hover:text-red-700 p-1 cursor-pointer font-bold" data-index="${index}" title="刪除">
+                        🗑️
+                    </button>
+                `;
+                studentListContainer.appendChild(item);
+            });
+
+            studentListContainer.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const idx = parseInt(btn.getAttribute('data-index'), 10);
+                    names.splice(idx, 1);
+                    resetAvailableIndices();
+                    renderSettingsList();
+                    drawWheel();
+                });
+            });
+        }
+
+        function openSettingsModal() {
+            renderSettingsList();
+            overlay.classList.remove('hidden');
+            settingsModal.classList.remove('hidden');
+        }
+
+        function closeSettingsModal() {
+            settingsModal.classList.add('hidden');
+            if (popup.classList.contains('hidden')) {
+                overlay.classList.add('hidden');
+            }
+            drawWheel();
+        }
+
+        addStudentForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const newName = newStudentInput.value.trim();
+            if (newName) {
+                names.push(newName);
+                newStudentInput.value = '';
+                resetAvailableIndices();
+                renderSettingsList();
+                drawWheel();
+            }
+        });
+
+        settingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openSettingsModal();
+        });
+
+        closeSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeSettingsModal();
+        });
+
+        saveSettingsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            closeSettingsModal();
+        });
+
+        if (document.fonts) {
+            document.fonts.ready.then(() => {
+                drawWheel();
+            });
+        }
+
+        let audioCtx = null;
+        let isMuted = false;
+        let bgmIntervalId = null;
+
+        function initAudio() {
+            if (audioCtx) return;
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            audioCtx = new AudioContextClass();
+            startBgm();
+        }
+
+        const melodyPattern = [
+            523.25, 659.25, 783.99, 880.00, 1046.50, 880.00, 783.99, 659.25,
+            587.33, 659.25, 783.99, 587.33, 659.25, 523.25, 392.00, 523.25
+        ];
+        const bassPattern = [
+            130.81, 0, 196.00, 0, 174.61, 0, 196.00, 0,
+            130.81, 0, 164.81, 0, 174.61, 0, 196.00, 196.00
+        ];
+        let sequencerStep = 0;
+
+        function startBgm() {
+            if (bgmIntervalId) return;
+            
+            bgmIntervalId = setInterval(() => {
+                if (isMuted || !audioCtx) return;
+                
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+
+                const currentTime = audioCtx.currentTime;
+
+                const leadFreq = melodyPattern[sequencerStep % melodyPattern.length];
+                if (leadFreq > 0) {
+                    const oscLead = audioCtx.createOscillator();
+                    const gainLead = audioCtx.createGain();
+                    
+                    oscLead.type = 'triangle';
+                    oscLead.frequency.setValueAtTime(leadFreq, currentTime);
+                    
+                    gainLead.gain.setValueAtTime(0.0, currentTime);
+                    gainLead.gain.linearRampToValueAtTime(0.14, currentTime + 0.05); // Boosted BGM Lead volume
+                    gainLead.gain.exponentialRampToValueAtTime(0.0001, currentTime + 0.28);
+                    
+                    oscLead.connect(gainLead);
+                    gainLead.connect(audioCtx.destination);
+                    
+                    oscLead.start(currentTime);
+                    oscLead.stop(currentTime + 0.3);
+                }
+
+                const bassFreq = bassPattern[sequencerStep % bassPattern.length];
+                if (bassFreq > 0) {
+                    const oscBass = audioCtx.createOscillator();
+                    const gainBass = audioCtx.createGain();
+                    const filter = audioCtx.createBiquadFilter();
+                    
+                    oscBass.type = 'sawtooth';
+                    oscBass.frequency.setValueAtTime(bassFreq, currentTime);
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.setValueAtTime(250, currentTime);
+                    
+                    gainBass.gain.setValueAtTime(0.0, currentTime);
+                    gainBass.gain.linearRampToValueAtTime(0.18, currentTime + 0.03); // Boosted BGM Bass volume
+                    gainBass.gain.exponentialRampToValueAtTime(0.0001, currentTime + 0.25);
+                    
+                    oscBass.connect(filter);
+                    filter.connect(gainBass);
+                    gainBass.connect(audioCtx.destination);
+                    
+                    oscBass.start(currentTime);
+                    oscBass.stop(currentTime + 0.3);
+                }
+                
+                sequencerStep++;
+            }, 220);
+        }
+
+        function playTickSound() {
+            if (isMuted || !audioCtx) return;
+
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.04);
+
+            gain.gain.setValueAtTime(0.25, audioCtx.currentTime); // Boosted tick sound volume
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function playVictorySound() {
+            if (isMuted || !audioCtx) return;
+            const now = audioCtx.currentTime;
+
+            // 1. Fanfare Melody
+            const fanfare = [
+                { f: 523.25, d: 0.08 },
+                { f: 659.25, d: 0.08 },
+                { f: 783.99, d: 0.08 },
+                { f: 1046.50, d: 0.22 },
+                { f: 783.99, d: 0.1 },
+                { f: 1046.50, d: 0.5 }
+            ];
+
+            let timeOffset = 0;
+            fanfare.forEach(note => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                const filter = audioCtx.createBiquadFilter();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(note.f, now + timeOffset);
+
+                filter.type = 'lowpass';
+                filter.frequency.setValueAtTime(1400, now + timeOffset);
+
+                gain.gain.setValueAtTime(0, now + timeOffset);
+                gain.gain.linearRampToValueAtTime(0.28, now + timeOffset + 0.02); // Boosted Fanfare volume
+                gain.gain.exponentialRampToValueAtTime(0.0001, now + timeOffset + note.d - 0.01);
+
+                osc.connect(filter);
+                filter.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start(now + timeOffset);
+                osc.stop(now + timeOffset + note.d);
+                timeOffset += note.d - 0.02;
+            });
+
+            // 2. Crowd Cheer Noise Effect
+            const bufferSize = audioCtx.sampleRate * 2.0;
+            const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+            const output = noiseBuffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                output[i] = Math.random() * 2 - 1;
+            }
+
+            const noiseSource = audioCtx.createBufferSource();
+            noiseSource.buffer = noiseBuffer;
+
+            const noiseFilter = audioCtx.createBiquadFilter();
+            noiseFilter.type = 'bandpass';
+            noiseFilter.frequency.setValueAtTime(900, now);
+            noiseFilter.Q.setValueAtTime(1.2, now);
+
+            const noiseGain = audioCtx.createGain();
+            noiseGain.gain.setValueAtTime(0, now);
+            noiseGain.gain.linearRampToValueAtTime(0.38, now + 0.15); // Boosted Crowd Cheer volume
+            noiseGain.gain.exponentialRampToValueAtTime(0.0001, now + 1.8);
+
+            noiseSource.connect(noiseFilter);
+            noiseFilter.connect(noiseGain);
+            noiseGain.connect(audioCtx.destination);
+
+            noiseSource.start(now);
+            noiseSource.stop(now + 2.0);
+        }
+
+        const palette = ['#ff7675', '#74b9ff', '#55efc4', '#ffeaa7', '#a29bfe', '#fd79a8', '#f4c430', '#e63946'];
+
+        class Particle {
+            constructor(isFirework = false, originX = 0, originY = 0) {
+                this.isFirework = isFirework;
+                this.color = palette[Math.floor(Math.random() * palette.length)];
+                
+                if (this.isFirework) {
+                    this.x = originX;
+                    this.y = originY;
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = Math.random() * 8 + 2;
+                    this.vx = Math.cos(angle) * speed;
+                    this.vy = Math.sin(angle) * speed;
+                    this.gravity = 0.12;
+                    this.alpha = 1;
+                    this.decay = Math.random() * 0.02 + 0.015;
+                    this.size = Math.random() * 4 + 3;
+                } else {
+                    this.x = Math.random() * fxCanvas.width;
+                    this.y = Math.random() * -fxCanvas.height - 20;
+                    this.size = Math.random() * 8 + 6;
+                    this.vy = Math.random() * 4 + 3;
+                    this.vx = Math.random() * 3 - 1.5;
+                    this.rotation = Math.random() * 360;
+                    this.rotationSpeed = Math.random() * 6 - 3;
+                    this.shapeType = Math.floor(Math.random() * 3);
+                }
+            }
+
+            update() {
+                if (this.isFirework) {
+                    this.x += this.vx;
+                    this.y += this.vy;
+                    this.vy += this.gravity;
+                    this.alpha -= this.decay;
+                } else {
+                    this.y += this.vy;
+                    this.x += this.vx;
+                    this.rotation += this.rotationSpeed;
+                    if (this.y > fxCanvas.height) {
+                        this.y = -20;
+                        this.x = Math.random() * fxCanvas.width;
+                    }
+                }
+            }
+
+            draw() {
+                fxCtx.save();
+                if (this.isFirework) {
+                    fxCtx.globalAlpha = Math.max(0, this.alpha);
+                    fxCtx.fillStyle = this.color;
+                    fxCtx.beginPath();
+                    fxCtx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                    fxCtx.fill();
+                } else {
+                    fxCtx.translate(this.x, this.y);
+                    fxCtx.rotate(this.rotation * Math.PI / 180);
+                    fxCtx.fillStyle = this.color;
+                    fxCtx.beginPath();
+                    if (this.shapeType === 0) {
+                        fxCtx.ellipse(0, 0, this.size, this.size / 1.8, 0, 0, 2 * Math.PI);
+                    } else if (this.shapeType === 1) {
+                        fxCtx.rect(-this.size, -this.size / 2, this.size * 2, this.size);
+                    } else {
+                        fxCtx.arc(0, 0, this.size / 1.2, 0, 2 * Math.PI);
+                    }
+                    fxCtx.fill();
+                }
+                fxCtx.restore();
+            }
+        }
+
+        function launchCelebrationFX() {
+            particles = [];
+            // Add Confetti
+            for (let i = 0; i < 120; i++) {
+                particles.push(new Particle(false));
+            }
+            // Add Fireworks bursts
+            const centerX = window.innerWidth / 2;
+            const centerY = window.innerHeight / 2;
+            const burstPoints = [
+                { x: centerX - 180, y: centerY - 100 },
+                { x: centerX + 180, y: centerY - 100 },
+                { x: centerX, y: centerY - 180 }
+            ];
+            burstPoints.forEach(pt => {
+                for (let i = 0; i < 45; i++) {
+                    particles.push(new Particle(true, pt.x, pt.y));
+                }
+            });
+
+            fxCanvas.classList.remove('hidden');
+            fxActive = true;
+            animateFX();
+        }
+
+        function animateFX() {
+            if (!fxActive) return;
+            fxCtx.clearRect(0, 0, fxCanvas.width, fxCanvas.height);
+            
+            particles = particles.filter(p => !p.isFirework || p.alpha > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animateFX);
+        }
+
+        function stopCelebrationFX() {
+            fxActive = false;
+            fxCanvas.classList.add('hidden');
+        }
+
+        let animationFrameId = null;
+        let lastTargetSlice = -1;
+
+        function updateWheelAnimation(now) {
+            const degreesPerSlice = 360 / numSlices;
+
+            if (spinState === 'SPINNING') {
+                if (currentSpeed < 18) {
+                    currentSpeed += 0.8;
+                }
+                currentRotation += currentSpeed;
+            } else if (spinState === 'STOPPING') {
+                const elapsed = now - stopStartTime;
+                const progress = Math.min(elapsed / stopDuration, 1);
+                const easedProgress = 1 - Math.pow(1 - progress, 3);
+                
+                currentRotation = stopStartRotation + (stopTargetRotation - stopStartRotation) * easedProgress;
+
+                if (progress >= 1) {
+                    spinState = 'IDLE';
+                    const winningIndex = Math.floor((360 - (currentRotation % 360)) / degreesPerSlice) % numSlices;
+                    showWinner(names[winningIndex]);
+                    return;
+                }
+            }
+
+            canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+            const normalizedDeg = (360 - (currentRotation % 360)) % 360;
+            const currentSliceIndex = Math.floor(normalizedDeg / degreesPerSlice) % numSlices;
+
+            if (currentSliceIndex !== lastTargetSlice) {
+                playTickSound();
+                lastTargetSlice = currentSliceIndex;
+            }
+
+            if (spinState !== 'IDLE') {
+                animationFrameId = requestAnimationFrame(updateWheelAnimation);
+            }
+        }
+
+        function handleGlobalInteraction() {
+            initAudio();
+
+            if (!popup.classList.contains('hidden')) {
+                closePopup();
+                return;
+            }
+
+            if (spinState === 'IDLE') {
+                spinState = 'SPINNING';
+                currentSpeed = 3;
+                animationFrameId = requestAnimationFrame(updateWheelAnimation);
+            } else if (spinState === 'SPINNING') {
+                spinState = 'STOPPING';
+                stopStartTime = performance.now();
+                stopStartRotation = currentRotation;
+
+                // Auto-reset pool to start 2nd round when all students are drawn once
+                if (!availableIndices || availableIndices.length === 0) {
+                    resetAvailableIndices();
+                }
+
+                // Pick an unselected candidate randomly
+                const pickPos = Math.floor(Math.random() * availableIndices.length);
+                const selectedIndex = availableIndices.splice(pickPos, 1)[0];
+
+                const degreesPerSlice = 360 / numSlices;
+                const targetAngleMod = (360 - (selectedIndex + 0.5) * degreesPerSlice) % 360;
+
+                // Add slight natural variation within the target slice
+                const jitter = (Math.random() - 0.5) * 0.6 * degreesPerSlice;
+                const finalMod = (targetAngleMod + jitter + 360) % 360;
+
+                const currentMod = stopStartRotation % 360;
+                let delta = (finalMod - currentMod) % 360;
+                if (delta < 0) delta += 360;
+
+                const extraGlide = (3 + Math.floor(Math.random() * 2)) * 360 + delta;
+                stopTargetRotation = stopStartRotation + extraGlide;
+            }
+        }
+
+        function showWinner(name) {
+            winnerNameText.textContent = name;
+            overlay.classList.remove('hidden');
+            popup.classList.remove('hidden');
+            
+            playVictorySound();
+            launchCelebrationFX();
+            
+            setTimeout(() => {
+                popup.classList.remove('scale-95');
+                popup.classList.add('scale-100');
+            }, 10);
+        }
+
+        function closePopup() {
+            popup.classList.add('scale-95');
+            popup.classList.remove('scale-100');
+            stopCelebrationFX();
+            
+            setTimeout(() => {
+                popup.classList.add('hidden');
+                overlay.classList.add('hidden');
+            }, 200);
+        }
+
+        document.body.addEventListener('click', (event) => {
+            if (event.target.closest('#mute-btn') || event.target.closest('#settings-btn') || event.target.closest('#settings-modal')) {
+                return;
+            }
+            handleGlobalInteraction();
+        });
+
+        window.addEventListener('keydown', (event) => {
+            if (settingsModal.classList.contains('hidden') === false) {
+                return; // Don't trigger spin if settings is open
+            }
+            if (event.key === ' ' || event.code === 'Space') {
+                event.preventDefault();
+            }
+            handleGlobalInteraction();
+        });
+
+        overlay.addEventListener('click', () => {
+            if (!settingsModal.classList.contains('hidden')) {
+                closeSettingsModal();
+            } else {
+                closePopup();
+            }
+        });
+
+        muteBtn.addEventListener('click', () => {
+            isMuted = !isMuted;
+            if (isMuted) {
+                speakerIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M17.25 9.75 19.5 12m0 0 2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6 4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />`;
+                muteBtn.classList.add('bg-red-50');
+            } else {
+                speakerIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" d="M19.114 5.636a9 9 0 0 1 0 12.728M16.463 8.288a5.25 5.25 0 0 1 0 7.424M6.75 8.25l4.72-4.72a.75.75 0 0 1 1.28.53v15.88a.75.75 0 0 1-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.009 9.009 0 0 1 2.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75Z" />`;
+                muteBtn.classList.remove('bg-red-50');
+            }
+        });
+
+        drawWheel();
+    </script>
+</body>
+</html>
