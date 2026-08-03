@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台語子音互動轉盤 - 齒音</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      background-color: #f1f5f9; color: #1e293b;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    h1 { font-size: 2.8rem; color: #0f172a; margin-bottom: 24px; }
+    .wheel-card {
+      background: #ffffff; border-radius: 32px; padding: 35px;
+      display: flex; flex-direction: column; align-items: center;
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.12); border: 1px solid #e2e8f0;
+    }
+    .wheel-wrapper { position: relative; width: 550px; height: 550px; }
+    .pointer-arrow {
+      position: absolute; right: -20px; top: 50%; transform: translateY(-50%);
+      width: 0; height: 0;
+      border-top: 22px solid transparent; border-bottom: 22px solid transparent;
+      border-right: 35px solid #ef4444; z-index: 10;
+      filter: drop-shadow(3px 3px 5px rgba(0,0,0,0.3));
+    }
+    canvas {
+      width: 550px; height: 550px; border-radius: 50%;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15); cursor: pointer;
+    }
+    .center-cap {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      width: 45px; height: 45px; background: #ffffff; border-radius: 50%;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3); z-index: 5; pointer-events: none;
+    }
+    .display-info {
+      margin-top: 30px; background: #f8fafc; border: 2px solid #cbd5e1;
+      border-radius: 20px; padding: 18px 30px; text-align: center; font-size: 1.5rem; width: 100%;
+    }
+    .display-info span.highlight { color: #ef4444; font-weight: bold; font-size: 2rem; }
+  </style>
+</head>
+<body>
+
+  <h1>【齒音】互動轉盤</h1>
+
+  <div class="wheel-card">
+    <div class="wheel-wrapper">
+      <canvas id="wheelCanvas" width="600" height="600"></canvas>
+      <div class="pointer-arrow"></div>
+      <div class="center-cap"></div>
+    </div>
+    <div class="display-info" id="displayInfo">抽籤結果：<span class="highlight">--</span></div>
+  </div>
+
+  <script>
+    const items = [
+      { symbol: "ch", icon: "🍏", name: "棗仔 (chó-á)" },
+      { symbol: "chh", icon: "🏠", name: "厝 (chhù)" },
+      { symbol: "s", icon: "🗝️", name: "鎖 (só)" },
+      { symbol: "j", icon: "2️⃣", name: "二 (jī)" }
+    ];
+    const colors = ["#4169e1", "#ff7665", "#90ee90", "#f5dea6"];
+    const canvas = document.getElementById("wheelCanvas");
+    const displayInfo = document.getElementById("displayInfo");
+
+    let currentRotation = 0;
+    let isSpinning = false;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playClickSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(120, audioCtx.currentTime + 0.04);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.04);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.04);
+    }
+
+    function playWinSound() {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime + idx * 0.1);
+        gain.gain.setValueAtTime(0.2, audioCtx.currentTime + idx * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + idx * 0.1 + 0.3);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(audioCtx.currentTime + idx * 0.1);
+        osc.stop(audioCtx.currentTime + idx * 0.1 + 0.3);
+      });
+    }
+
+    function drawWheel() {
+      const ctx = canvas.getContext("2d");
+      const numSectors = items.length;
+      const arcSize = (2 * Math.PI) / numSectors;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = canvas.width / 2 - 6;
+
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < numSectors; i++) {
+        const startAngle = i * arcSize;
+        const endAngle = startAngle + arcSize;
+
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(centerX, centerY);
+        ctx.rotate(startAngle + arcSize / 2);
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        ctx.fillStyle = "#000000";
+        
+        ctx.font = "bold 58px sans-serif";
+        ctx.fillText(`${items[i].symbol} ${items[i].icon}`, radius - 20, 0);
+
+        ctx.restore();
+      }
+    }
+
+    function spinWheel() {
+      if (isSpinning) return;
+      isSpinning = true;
+
+      const extraDegrees = 1800 + Math.floor(Math.random() * 1080);
+      currentRotation += extraDegrees;
+
+      let clicks = 0;
+      const soundInterval = setInterval(() => {
+        playClickSound();
+        clicks++;
+        if (clicks > 20) clearInterval(soundInterval);
+      }, 150);
+
+      canvas.style.transition = "transform 4s cubic-bezier(0.15, 0.9, 0.2, 1)";
+      canvas.style.transform = `rotate(${currentRotation}deg)`;
+
+      setTimeout(() => {
+        isSpinning = false;
+        clearInterval(soundInterval);
+        playWinSound();
+        updateResult();
+      }, 4000);
+    }
+
+    function updateResult() {
+      const itemCount = items.length;
+      const sectorAngle = 360 / itemCount;
+      let actualRotation = currentRotation % 360;
+      let winningAngle = (360 - actualRotation) % 360;
+      let itemIndex = Math.floor(winningAngle / sectorAngle);
+      const selected = items[itemIndex];
+
+      displayInfo.innerHTML = `抽籤結果：<span class="highlight">${selected.symbol}</span> ${selected.icon} <span style="font-size:1.2rem; color:#475569;">(${selected.name})</span>`;
+    }
+
+    drawWheel();
+    canvas.addEventListener("click", spinWheel);
+  </script>
+</body>
+</html>
