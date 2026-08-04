@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>【白話字-母音kap複母音練習】</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Iansui (芫荽) -->
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Iansui', '"芫荽"', 'cursive', 'sans-serif'],
+                    },
+                    colors: {
+                        vowel: {
+                            sky: '#e0f2fe',
+                            mint: '#d1fae5',
+                            violet: '#ede9fe',
+                            peach: '#ffedd5'
+                        }
+                    },
+                    animation: {
+                        'pop-in': 'popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                        'bounce-subtle': 'bounceSubtle 2s infinite',
+                    },
+                    keyframes: {
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.5) translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-4px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f5f3ff;
+            background-image: radial-gradient(#c7d2fe 1.5px, transparent 1.5px);
+            background-size: 22px 22px;
+        }
+        .cute-card-shadow {
+            box-shadow: 0 4px 0px 0px rgba(199, 210, 254, 0.8), 0 6px 10px -3px rgba(0, 0, 0, 0.05);
+        }
+        .cute-focus-shadow {
+            box-shadow: 0 12px 0px 0px rgba(199, 210, 254, 0.9), 0 15px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="text-slate-800 font-sans h-screen max-h-screen flex flex-col justify-between select-none overflow-hidden cursor-pointer">
+
+    <!-- Header (Compact Padding) -->
+    <header class="bg-white/90 backdrop-blur-md border-b-2 border-slate-200 sticky top-0 z-30 px-4 py-1.5 shadow-sm">
+        <div class="max-w-5xl mx-auto flex items-center justify-between gap-2">
+            
+            <!-- Title -->
+            <div class="flex items-center space-x-2">
+                <div class="bg-sky-400 text-white font-black px-2 py-1 rounded-xl shadow-sm text-sm animate-bounce-subtle">
+                    <i class="fa-solid fa-cloud"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-black tracking-wide text-sky-600 drop-shadow-sm">
+                        【白話字-母音kap複母音練習】
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Action Toolbar -->
+            <div class="flex items-center space-x-2">
+                <!-- Reset Progress Icon Button -->
+                <button id="resetDrawsBtn" class="p-2 rounded-xl bg-slate-100 hover:bg-rose-50 text-rose-500 border-2 border-slate-200 hover:border-rose-300 transition active:scale-95" title="重置進度">
+                    <i class="fa-solid fa-rotate-right text-sm"></i>
+                </button>
+
+                <!-- Edit Cards Icon Button -->
+                <button id="openEditBtn" class="p-2 rounded-xl bg-slate-100 hover:bg-sky-50 text-sky-500 border-2 border-slate-200 hover:border-sky-300 transition active:scale-95" title="編輯字卡">
+                    <i class="fa-solid fa-pen-to-square text-sm"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-5xl mx-auto w-full px-3 py-1.5 flex-1 flex flex-col justify-between overflow-hidden gap-1.5">
+        
+        <!-- Progress Bar & Counter (Compact) -->
+        <div class="flex items-center justify-between text-xs font-black text-slate-600 bg-white px-3 py-1 rounded-xl border-2 border-slate-200 shadow-sm max-w-xs mx-auto w-full shrink-0">
+            <span>複習進度</span>
+            <div class="flex items-center space-x-2">
+                <div class="w-24 bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                    <div id="progressBar" class="bg-gradient-to-r from-sky-400 to-indigo-500 h-full transition-all duration-300 w-0"></div>
+                </div>
+                <span class="text-sky-600"><span id="drawnCardsCount">0</span> / <span id="totalCardsCount">16</span></span>
+            </div>
+        </div>
+
+        <!-- Four Specific Rows Container (Maximizing Space) -->
+        <div id="rowsContainer" class="flex-1 flex flex-col justify-between gap-2 max-w-6xl mx-auto w-full min-h-0 py-1">
+            <!-- Dynamic Vowel & Diphthong Rows will be inserted here -->
+        </div>
+
+    </main>
+
+    <!-- Focus Modal Stage -->
+    <div id="focusModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex flex-col items-center justify-between p-4 md:p-6 hidden opacity-0 transition-opacity duration-300">
+        
+        <!-- Modal Top Bar -->
+        <div class="w-full max-w-3xl flex items-center justify-between z-10">
+            <div class="px-4 py-1.5 bg-white/90 rounded-full border-2 border-slate-200 flex items-center gap-2 text-slate-700 text-xs font-bold shadow-sm">
+                <span class="w-2.5 h-2.5 rounded-full bg-sky-400 animate-ping"></span>
+                <span id="modalProgressText">1 / 16</span>
+            </div>
+
+            <button id="closeFocusModalBtn" class="p-2.5 text-slate-500 hover:text-slate-800 bg-white hover:bg-slate-100 rounded-full transition border-2 border-slate-200 shadow-sm">
+                <i class="fa-solid fa-xmark text-lg w-5 h-5 flex items-center justify-center"></i>
+            </button>
+        </div>
+
+        <!-- Centered Main Flashcard Stage -->
+        <div id="cardStage" class="flex-1 w-full max-w-lg my-auto flex items-center justify-center cursor-pointer p-2">
+            <div id="focusCard" class="w-full aspect-[4/3] max-h-[55vh] bg-white rounded-3xl border-4 border-sky-300 cute-focus-shadow p-6 flex flex-col items-center justify-center relative overflow-hidden transform transition-all duration-300 hover:scale-[1.02]">
+                
+                <!-- Cute Decorative Accent Spheres -->
+                <div class="absolute -top-16 -right-16 w-44 h-44 bg-violet-200/40 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-44 h-44 bg-sky-200/40 rounded-full blur-2xl pointer-events-none"></div>
+
+                <!-- Pure Romanization Vowel Text -->
+                <div class="my-auto flex items-center justify-center">
+                    <h2 id="modalConsonant" class="text-7xl sm:text-9xl font-black tracking-wide text-sky-500 drop-shadow-sm select-none">
+                        a
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Cards Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border-4 border-slate-200 rounded-3xl max-w-md w-full p-5 shadow-2xl flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b-2 border-slate-100 mb-3">
+                <h3 class="text-base font-black text-sky-600 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    編輯白話字母音kap複母音
+                </h3>
+                <button id="closeEditModalBtn" class="text-slate-400 hover:text-slate-700">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <p class="text-xs text-slate-500 mb-2">
+                用換行隔開每一列，用逗號隔開字母。
+            </p>
+
+            <textarea id="editCardsTextarea" class="w-full h-40 bg-slate-50 border-2 border-slate-200 rounded-2xl p-3 text-sm text-slate-800 font-mono focus:outline-none focus:border-sky-400 resize-none mb-3" placeholder="a, i, u, o͘, e, o..."></textarea>
+
+            <div class="flex justify-between items-center">
+                <button id="restoreDefaultCardsBtn" class="text-xs text-slate-400 hover:text-sky-600 underline font-bold">
+                    恢復預設母音
+                </button>
+                <div class="flex space-x-2">
+                    <button id="cancelEditBtn" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 text-xs font-bold">
+                        取消
+                    </button>
+                    <button id="saveEditBtn" class="px-4 py-1.5 bg-sky-400 hover:bg-sky-300 text-white rounded-xl text-xs font-black shadow-sm">
+                        儲存套用
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- Explicit POJ Vowel & Diphthong Row Structure ---
+        const ROW_GROUPS = [
+            ['a', 'i', 'u', 'o͘', 'e', 'o'],
+            ['ai', 'au', 'ui'],
+            ['ia', 'iu', 'io', 'iau'],
+            ['oa', 'oe', 'oai']
+        ];
+
+        // Specific vowels/diphthongs color overrides
+        const RED_SYMBOLS = ['ia', 'iu', 'io', 'iau'];
+        const PURPLE_SYMBOLS = ['ui'];
+
+        // Cute bright pastel theme colors for rows
+        const ROW_COLORS = [
+            { bg: 'bg-sky-50 hover:bg-sky-100', border: 'border-sky-300', text: 'text-sky-600' },
+            { bg: 'bg-emerald-50 hover:bg-emerald-100', border: 'border-emerald-300', text: 'text-emerald-600' },
+            { bg: 'bg-violet-50 hover:bg-violet-100', border: 'border-violet-300', text: 'text-violet-600' },
+            { bg: 'bg-amber-50 hover:bg-amber-100', border: 'border-amber-300', text: 'text-amber-600' }
+        ];
+
+        // --- Application State ---
+        let allConsonants = [];
+        let drawnIndices = new Set();
+        let currentIndex = -1;
+        let isFocusMode = false;
+
+        // Audio Context for subtle sound feedback
+        let audioCtx = null;
+
+        // --- DOM Elements ---
+        const rowsContainer = document.getElementById('rowsContainer');
+        const drawnCardsCount = document.getElementById('drawnCardsCount');
+        const totalCardsCount = document.getElementById('totalCardsCount');
+        const progressBar = document.getElementById('progressBar');
+
+        const focusModal = document.getElementById('focusModal');
+        const focusCard = document.getElementById('focusCard');
+        const modalConsonant = document.getElementById('modalConsonant');
+        const modalProgressText = document.getElementById('modalProgressText');
+        const closeFocusModalBtn = document.getElementById('closeFocusModalBtn');
+
+        const resetDrawsBtn = document.getElementById('resetDrawsBtn');
+
+        const openEditBtn = document.getElementById('openEditBtn');
+        const editModal = document.getElementById('editModal');
+        const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const editCardsTextarea = document.getElementById('editCardsTextarea');
+        const restoreDefaultCardsBtn = document.getElementById('restoreDefaultCardsBtn');
+
+        // Init App
+        function init() {
+            flattenConsonants();
+            renderRows();
+            setupEventListeners();
+        }
+
+        function flattenConsonants() {
+            allConsonants = [];
+            ROW_GROUPS.forEach(group => {
+                group.forEach(symbol => allConsonants.push(symbol));
+            });
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playChime(freq = 587.33, duration = 0.15) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        // Render Cards structured into 4 rows
+        function renderRows() {
+            rowsContainer.innerHTML = '';
+
+            totalCardsCount.textContent = allConsonants.length;
+            drawnCardsCount.textContent = drawnIndices.size;
+            const pct = allConsonants.length > 0 ? (drawnIndices.size / allConsonants.length) * 100 : 0;
+            progressBar.style.width = `${pct}%`;
+
+            let flatIdx = 0;
+
+            ROW_GROUPS.forEach((group, rowIndex) => {
+                const rowTheme = ROW_COLORS[rowIndex % ROW_COLORS.length];
+                
+                const rowEl = document.createElement('div');
+                rowEl.className = `p-1.5 sm:p-2 rounded-2xl bg-white/80 border-2 border-slate-200 shadow-sm flex flex-1 items-center justify-center gap-2 sm:gap-3 w-full h-full min-h-0`;
+
+                group.forEach(symbol => {
+                    const currentIndexVal = flatIdx;
+                    const isDrawn = drawnIndices.has(currentIndexVal);
+                    const isRed = RED_SYMBOLS.includes(symbol);
+                    const isPurple = PURPLE_SYMBOLS.includes(symbol);
+
+                    let cardBg = rowTheme.bg;
+                    let cardBorder = rowTheme.border;
+                    let textColor = isDrawn ? 'text-slate-400' : rowTheme.text;
+
+                    if (isRed) {
+                        cardBg = 'bg-rose-50 hover:bg-rose-100';
+                        cardBorder = 'border-rose-400';
+                        if (!isDrawn) textColor = 'text-rose-500';
+                    } else if (isPurple) {
+                        cardBg = 'bg-purple-50 hover:bg-purple-100';
+                        cardBorder = 'border-purple-400';
+                        if (!isDrawn) textColor = 'text-purple-600';
+                    }
+
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `relative rounded-2xl p-1 border-2 transition-all duration-200 flex-1 min-w-[50px] max-w-[240px] h-full flex items-center justify-center cute-card-shadow ${
+                        isDrawn 
+                        ? 'bg-slate-100 border-slate-200 opacity-35 scale-95' 
+                        : `${cardBg} ${cardBorder}`
+                    }`;
+
+                    cardEl.onclick = (e) => {
+                        e.stopPropagation();
+                        openCardAtIndex(currentIndexVal);
+                    };
+
+                    cardEl.innerHTML = `
+                        ${isDrawn ? '<div class="absolute top-1 right-2 text-emerald-500 text-xs sm:text-sm"><i class="fa-solid fa-check font-black"></i></div>' : ''}
+                        <div class="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-black ${textColor} tracking-wide select-none drop-shadow-sm">
+                            ${symbol}
+                        </div>
+                    `;
+
+                    rowEl.appendChild(cardEl);
+                    flatIdx++;
+                });
+
+                rowsContainer.appendChild(rowEl);
+            });
+        }
+
+        function drawNextRandomCard() {
+            const undrawn = [];
+            allConsonants.forEach((_, idx) => {
+                if (!drawnIndices.has(idx)) undrawn.push(idx);
+            });
+
+            if (undrawn.length === 0) {
+                showToast('🎉 所有母音已複習完畢！自動重置');
+                drawnIndices.clear();
+                allConsonants.forEach((_, idx) => undrawn.push(idx));
+            }
+
+            const randomIndex = undrawn[Math.floor(Math.random() * undrawn.length)];
+            openCardAtIndex(randomIndex);
+        }
+
+        // Open focus view for card
+        function openCardAtIndex(index) {
+            if (index < 0 || index >= allConsonants.length) return;
+
+            currentIndex = index;
+            drawnIndices.add(index);
+            renderRows();
+
+            const symbol = allConsonants[index];
+            const isRed = RED_SYMBOLS.includes(symbol);
+            const isPurple = PURPLE_SYMBOLS.includes(symbol);
+
+            let textColorClass = 'text-sky-500';
+            let borderColorClass = 'border-sky-300';
+
+            if (isRed) {
+                textColorClass = 'text-rose-500';
+                borderColorClass = 'border-rose-400';
+            } else if (isPurple) {
+                textColorClass = 'text-purple-600';
+                borderColorClass = 'border-purple-400';
+            }
+
+            modalConsonant.textContent = symbol;
+            modalConsonant.className = `text-7xl sm:text-9xl font-black tracking-wide ${textColorClass} drop-shadow-sm select-none`;
+            focusCard.className = `w-full aspect-[4/3] max-h-[55vh] bg-white rounded-3xl border-4 ${borderColorClass} cute-focus-shadow p-6 flex flex-col items-center justify-center relative overflow-hidden transform transition-all duration-300 hover:scale-[1.02]`;
+            modalProgressText.textContent = `${drawnIndices.size} / ${allConsonants.length}`;
+
+            if (!isFocusMode) {
+                isFocusMode = true;
+                focusModal.classList.remove('hidden');
+                setTimeout(() => {
+                    focusModal.classList.remove('opacity-0');
+                }, 10);
+            }
+
+            focusCard.classList.remove('animate-pop-in');
+            void focusCard.offsetWidth;
+            focusCard.classList.add('animate-pop-in');
+
+            playChime(523.25, 0.12);
+        }
+
+        function closeFocusModal() {
+            isFocusMode = false;
+            focusModal.classList.add('opacity-0');
+            setTimeout(() => {
+                focusModal.classList.add('hidden');
+            }, 300);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-sky-400 text-white border-2 border-sky-300 px-5 py-2.5 rounded-2xl shadow-xl z-50 font-black text-sm flex items-center space-x-2 animate-bounce';
+            toast.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 2400);
+        }
+
+        function openEditModal() {
+            editCardsTextarea.value = ROW_GROUPS.map(g => g.join(', ')).join('\n');
+            editModal.classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+        }
+
+        function saveEditedCards() {
+            const lines = editCardsTextarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const newGroups = [];
+
+            lines.forEach(line => {
+                const items = line.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                if (items.length > 0) {
+                    newGroups.push(items);
+                }
+            });
+
+            if (newGroups.length === 0) {
+                showToast('❌ 請至少輸入一組有效的母音字母！');
+                return;
+            }
+
+            ROW_GROUPS.length = 0;
+            newGroups.forEach(g => ROW_GROUPS.push(g));
+
+            flattenConsonants();
+            drawnIndices.clear();
+            closeEditModal();
+            renderRows();
+            showToast('✅ 已成功變更母音內容！');
+        }
+
+        function setupEventListeners() {
+            closeFocusModalBtn.onclick = (e) => {
+                e.stopPropagation();
+                closeFocusModal();
+            };
+
+            resetDrawsBtn.onclick = (e) => {
+                e.stopPropagation();
+                drawnIndices.clear();
+                renderRows();
+                showToast('已重置所有練習紀錄');
+            };
+
+            openEditBtn.onclick = (e) => {
+                e.stopPropagation();
+                openEditModal();
+            };
+            closeEditModalBtn.onclick = closeEditModal;
+            cancelEditBtn.onclick = closeEditModal;
+            saveEditBtn.onclick = saveEditedCards;
+
+            restoreDefaultCardsBtn.onclick = () => {
+                ROW_GROUPS.length = 0;
+                [
+                    ['a', 'i', 'u', 'o͘', 'e', 'o'],
+                    ['ai', 'au', 'ui'],
+                    ['ia', 'iu', 'io', 'iau'],
+                    ['oa', 'oe', 'oai']
+                ].forEach(g => ROW_GROUPS.push(g));
+                
+                flattenConsonants();
+                drawnIndices.clear();
+                openEditModal();
+                showToast('已恢復預設白話字母音');
+            };
+
+            // Global Left-Click listener anywhere on the screen
+            document.addEventListener('click', (e) => {
+                if (!editModal.classList.contains('hidden')) return;
+
+                if (e.target.closest('#resetDrawsBtn') || 
+                    e.target.closest('#openEditBtn') || 
+                    e.target.closest('#closeFocusModalBtn')) {
+                    return;
+                }
+
+                drawNextRandomCard();
+            });
+
+            // Global Right-Click listener anywhere on the screen
+            document.addEventListener('contextmenu', (e) => {
+                if (!editModal.classList.contains('hidden')) return;
+                if (editModal.contains(e.target)) return;
+
+                e.preventDefault();
+                drawNextRandomCard();
+            });
+
+            // Keyboard/Presenter clicker listener
+            document.addEventListener('keydown', (e) => {
+                if (!editModal.classList.contains('hidden')) return;
+
+                switch (e.code) {
+                    case 'Space':
+                    case 'PageDown':
+                    case 'PageUp':
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        drawNextRandomCard();
+                        break;
+                    case 'Escape':
+                        if (isFocusMode) closeFocusModal();
+                        if (!editModal.classList.contains('hidden')) closeEditModal();
+                        break;
+                }
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
