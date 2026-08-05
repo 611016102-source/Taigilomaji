@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>【白話字-鼻化母音練習】</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Iansui (芫荽) -->
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Iansui', '"芫荽"', 'cursive', 'sans-serif'],
+                    },
+                    animation: {
+                        'pop-in': 'popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                        'bounce-subtle': 'bounceSubtle 2s infinite',
+                    },
+                    keyframes: {
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.5) translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-4px)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Force Iansui font across ALL elements */
+        * {
+            font-family: 'Iansui', '芫荽', cursive, sans-serif !important;
+        }
+
+        body {
+            background-color: #f0fdf4; /* Emerald 50 */
+            background-image: radial-gradient(#4ade80 1.5px, transparent 1.5px); /* Emerald dot grid */
+            background-size: 22px 22px;
+            touch-action: manipulation;
+        }
+
+        .cute-card-shadow {
+            box-shadow: 0 5px 0px 0px rgba(74, 222, 128, 0.4), 0 8px 12px -3px rgba(0, 0, 0, 0.06);
+        }
+        
+        .cute-focus-shadow {
+            box-shadow: 0 14px 0px 0px rgba(74, 222, 128, 0.6), 0 18px 30px -5px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Fluid text size helper for maximum responsiveness */
+        .card-text-fluid {
+            font-size: clamp(2.2rem, 6.5vh, 4.8rem);
+            line-height: 1;
+        }
+
+        .modal-text-fluid {
+            font-size: clamp(6rem, 22vh, 14rem);
+            line-height: 1;
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-[100dvh] w-screen flex flex-col justify-between select-none overflow-hidden cursor-pointer">
+
+    <!-- Header (Compact & Responsive) -->
+    <header class="bg-white/90 backdrop-blur-md border-b-2 border-emerald-200 sticky top-0 z-30 px-3 sm:px-4 py-2 shadow-sm shrink-0">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+            
+            <!-- Title -->
+            <div class="flex items-center space-x-2">
+                <div class="bg-emerald-500 text-white font-black px-2.5 py-1 rounded-xl shadow-sm text-base sm:text-lg animate-bounce-subtle">
+                    <i class="fa-solid fa-seedling"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-2xl font-black tracking-wide text-emerald-700 drop-shadow-sm">
+                        【白話字-鼻化母音練習】
+                    </h1>
+                </div>
+            </div>
+
+            <!-- Action Toolbar -->
+            <div class="flex items-center space-x-2">
+                <!-- Reset Progress Button -->
+                <button id="resetDrawsBtn" class="p-2 sm:p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-2 border-emerald-200 hover:border-emerald-300 transition active:scale-95" title="重置進度">
+                    <i class="fa-solid fa-rotate-right text-base sm:text-lg"></i>
+                </button>
+
+                <!-- Edit Cards Button -->
+                <button id="openEditBtn" class="p-2 sm:p-2.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-600 border-2 border-emerald-200 hover:border-emerald-300 transition active:scale-95" title="編輯字卡">
+                    <i class="fa-solid fa-pen-to-square text-base sm:text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full px-2 sm:px-4 py-2 flex-1 flex flex-col justify-between overflow-hidden gap-2 min-h-0">
+        
+        <!-- Progress Bar & Counter -->
+        <div class="flex items-center justify-between text-xs sm:text-sm font-black text-slate-600 bg-white px-4 py-1.5 rounded-xl border-2 border-emerald-200 shadow-sm max-w-sm mx-auto w-full shrink-0">
+            <span>複習進度</span>
+            <div class="flex items-center space-x-2">
+                <div class="w-28 sm:w-36 bg-emerald-50 h-2.5 rounded-full overflow-hidden border border-emerald-200">
+                    <div id="progressBar" class="bg-gradient-to-r from-emerald-400 to-teal-500 h-full transition-all duration-300 w-0"></div>
+                </div>
+                <span class="text-emerald-700 font-black"><span id="drawnCardsCount">0</span> / <span id="totalCardsCount">11</span></span>
+            </div>
+        </div>
+
+        <!-- Dynamic Rows Container -->
+        <div id="rowsContainer" class="flex-1 flex flex-col justify-between gap-2 max-w-6xl mx-auto w-full min-h-0 py-1">
+            <!-- Dynamic Rows rendered via JS -->
+        </div>
+
+    </main>
+
+    <!-- Focus Modal Stage (Popup Magnified View) -->
+    <div id="focusModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex flex-col items-center justify-between p-3 sm:p-6 hidden opacity-0 transition-opacity duration-300">
+        
+        <!-- Modal Top Bar -->
+        <div class="w-full max-w-3xl flex items-center justify-between z-10">
+            <div class="px-4 py-1.5 bg-white/95 rounded-full border-2 border-emerald-200 flex items-center gap-2 text-slate-700 text-xs sm:text-sm font-black shadow-sm">
+                <span class="w-3 h-3 rounded-full bg-emerald-400 animate-ping"></span>
+                <span id="modalProgressText">1 / 11</span>
+            </div>
+
+            <button id="closeFocusModalBtn" class="p-2.5 sm:p-3 text-slate-500 hover:text-slate-800 bg-white hover:bg-slate-100 rounded-full transition border-2 border-slate-200 shadow-sm">
+                <i class="fa-solid fa-xmark text-xl w-6 h-6 flex items-center justify-center"></i>
+            </button>
+        </div>
+
+        <!-- Centered Main Flashcard Stage -->
+        <div id="cardStage" class="flex-1 w-full max-w-2xl my-auto flex items-center justify-center cursor-pointer p-2">
+            <div id="focusCard" class="w-full aspect-[4/3] max-h-[65vh] bg-white rounded-3xl border-4 sm:border-8 border-emerald-300 cute-focus-shadow p-6 flex flex-col items-center justify-center relative overflow-hidden transform transition-all duration-300 hover:scale-[1.01]">
+                
+                <!-- Decorative Accent Spheres -->
+                <div class="absolute -top-16 -right-16 w-52 h-52 bg-emerald-200/50 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-52 h-52 bg-teal-200/50 rounded-full blur-2xl pointer-events-none"></div>
+
+                <!-- Enlarged Romanization Text -->
+                <div class="my-auto flex items-center justify-center">
+                    <h2 id="modalConsonant" class="modal-text-fluid font-black tracking-wide text-emerald-600 drop-shadow-md select-none">
+                        aⁿ
+                    </h2>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Cards Modal -->
+    <div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white border-4 border-emerald-200 rounded-3xl max-w-md w-full p-5 shadow-2xl flex flex-col">
+            <div class="flex items-center justify-between pb-3 border-b-2 border-emerald-100 mb-3">
+                <h3 class="text-base sm:text-lg font-black text-emerald-700 flex items-center gap-2">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    編輯白話字鼻化母音
+                </h3>
+                <button id="closeEditModalBtn" class="text-slate-400 hover:text-slate-700">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+
+            <p class="text-xs sm:text-sm text-slate-500 mb-2">
+                用換行隔開每一列，用逗號隔開字母。
+            </p>
+
+            <textarea id="editCardsTextarea" class="w-full h-40 bg-emerald-50/50 border-2 border-emerald-200 rounded-2xl p-3 text-base text-slate-800 font-mono focus:outline-none focus:border-emerald-400 resize-none mb-3" placeholder="aⁿ, iⁿ, oⁿ, eⁿ..."></textarea>
+
+            <div class="flex justify-between items-center">
+                <button id="restoreDefaultCardsBtn" class="text-xs sm:text-sm text-slate-400 hover:text-emerald-600 underline font-bold">
+                    恢復預設母音
+                </button>
+                <div class="flex space-x-2">
+                    <button id="cancelEditBtn" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 rounded-xl text-slate-600 text-xs sm:text-sm font-bold">
+                        取消
+                    </button>
+                    <button id="saveEditBtn" class="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-white rounded-xl text-xs sm:text-sm font-black shadow-sm">
+                        儲存套用
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- POJ Nasalized Vowels Row Groups ---
+        // Row 1: aⁿ, iⁿ, oⁿ, eⁿ
+        // Row 2: aiⁿ, iaⁿ, iuⁿ, uiⁿ
+        // Row 3: oaⁿ, iauⁿ, oaiⁿ
+        const ROW_GROUPS = [
+            ['aⁿ', 'iⁿ', 'oⁿ', 'eⁿ'],
+            ['aiⁿ', 'iaⁿ', 'iuⁿ', 'uiⁿ'],
+            ['oaⁿ', 'iauⁿ', 'oaiⁿ']
+        ];
+
+        // Unified Emerald Theme Palette for all cards
+        const UNIFIED_THEME = { 
+            bg: 'bg-emerald-50 hover:bg-emerald-100', 
+            border: 'border-emerald-300', 
+            text: 'text-emerald-700' 
+        };
+
+        function getRegionTheme(rowIndex) {
+            return UNIFIED_THEME;
+        }
+
+        // --- Application State ---
+        let allConsonants = [];
+        let drawnIndices = new Set();
+        let currentIndex = -1;
+        let isFocusMode = false;
+
+        // Audio Context for chime feedback
+        let audioCtx = null;
+
+        // --- DOM Elements ---
+        const rowsContainer = document.getElementById('rowsContainer');
+        const drawnCardsCount = document.getElementById('drawnCardsCount');
+        const totalCardsCount = document.getElementById('totalCardsCount');
+        const progressBar = document.getElementById('progressBar');
+
+        const focusModal = document.getElementById('focusModal');
+        const focusCard = document.getElementById('focusCard');
+        const modalConsonant = document.getElementById('modalConsonant');
+        const modalProgressText = document.getElementById('modalProgressText');
+        const closeFocusModalBtn = document.getElementById('closeFocusModalBtn');
+
+        const resetDrawsBtn = document.getElementById('resetDrawsBtn');
+
+        const openEditBtn = document.getElementById('openEditBtn');
+        const editModal = document.getElementById('editModal');
+        const closeEditModalBtn = document.getElementById('closeEditModalBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const saveEditBtn = document.getElementById('saveEditBtn');
+        const editCardsTextarea = document.getElementById('editCardsTextarea');
+        const restoreDefaultCardsBtn = document.getElementById('restoreDefaultCardsBtn');
+
+        function init() {
+            flattenConsonants();
+            renderRows();
+            setupEventListeners();
+        }
+
+        function flattenConsonants() {
+            allConsonants = [];
+            ROW_GROUPS.forEach(group => {
+                group.forEach(symbol => allConsonants.push(symbol));
+            });
+        }
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playChime(freq = 587.33, duration = 0.15) {
+            try {
+                initAudio();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function renderRows() {
+            rowsContainer.innerHTML = '';
+
+            totalCardsCount.textContent = allConsonants.length;
+            drawnCardsCount.textContent = drawnIndices.size;
+            const pct = allConsonants.length > 0 ? (drawnIndices.size / allConsonants.length) * 100 : 0;
+            progressBar.style.width = `${pct}%`;
+
+            let flatIdx = 0;
+
+            ROW_GROUPS.forEach((group, rowIndex) => {
+                const regionTheme = getRegionTheme(rowIndex);
+                
+                const rowEl = document.createElement('div');
+                rowEl.className = `p-1 sm:p-2 rounded-2xl bg-white/85 border-2 border-emerald-200 shadow-sm flex flex-1 items-center justify-center gap-1.5 sm:gap-3 w-full h-full min-h-0`;
+
+                group.forEach(symbol => {
+                    const currentIndexVal = flatIdx;
+                    const isDrawn = drawnIndices.has(currentIndexVal);
+
+                    let cardBg = regionTheme.bg;
+                    let cardBorder = regionTheme.border;
+                    let textColor = isDrawn ? 'text-slate-400' : regionTheme.text;
+
+                    const cardEl = document.createElement('div');
+                    cardEl.className = `relative rounded-2xl p-1 sm:p-2 border-2 sm:border-3 transition-all duration-200 flex-1 min-w-0 max-w-[280px] h-full flex items-center justify-center cute-card-shadow ${
+                        isDrawn 
+                        ? 'bg-slate-100 border-slate-200 opacity-35 scale-95' 
+                        : `${cardBg} ${cardBorder}`
+                    }`;
+
+                    cardEl.onclick = (e) => {
+                        e.stopPropagation();
+                        openCardAtIndex(currentIndexVal);
+                    };
+
+                    cardEl.innerHTML = `
+                        ${isDrawn ? '<div class="absolute top-1 right-2 text-emerald-500 text-xs sm:text-base"><i class="fa-solid fa-check font-black"></i></div>' : ''}
+                        <div class="card-text-fluid font-black ${textColor} tracking-wide select-none drop-shadow-sm flex items-center justify-center">
+                            ${symbol}
+                        </div>
+                    `;
+
+                    rowEl.appendChild(cardEl);
+                    flatIdx++;
+                });
+
+                rowsContainer.appendChild(rowEl);
+            });
+        }
+
+        function drawNextRandomCard() {
+            const undrawn = [];
+            allConsonants.forEach((_, idx) => {
+                if (!drawnIndices.has(idx)) undrawn.push(idx);
+            });
+
+            if (undrawn.length === 0) {
+                showToast('🎉 所有鼻化母音已複習完畢！自動重置');
+                drawnIndices.clear();
+                allConsonants.forEach((_, idx) => undrawn.push(idx));
+            }
+
+            const randomIndex = undrawn[Math.floor(Math.random() * undrawn.length)];
+            openCardAtIndex(randomIndex);
+        }
+
+        // Open focus view for card
+        function openCardAtIndex(index) {
+            if (index < 0 || index >= allConsonants.length) return;
+
+            currentIndex = index;
+            drawnIndices.add(index);
+            renderRows();
+
+            const symbol = allConsonants[index];
+
+            // Determine row index to pick region theme for modal
+            let targetRow = 0;
+            let tempCount = 0;
+            for (let r = 0; r < ROW_GROUPS.length; r++) {
+                tempCount += ROW_GROUPS[r].length;
+                if (index < tempCount) {
+                    targetRow = r;
+                    break;
+                }
+            }
+            const regionTheme = getRegionTheme(targetRow);
+
+            modalConsonant.textContent = symbol;
+            modalConsonant.className = `modal-text-fluid font-black tracking-wide ${regionTheme.text} drop-shadow-md select-none flex items-center justify-center`;
+            focusCard.className = `w-full aspect-[4/3] max-h-[65vh] bg-white rounded-3xl border-4 sm:border-8 ${regionTheme.border} cute-focus-shadow p-6 flex flex-col items-center justify-center relative overflow-hidden transform transition-all duration-300 hover:scale-[1.01]`;
+            modalProgressText.textContent = `${drawnIndices.size} / ${allConsonants.length}`;
+
+            if (!isFocusMode) {
+                isFocusMode = true;
+                focusModal.classList.remove('hidden');
+                setTimeout(() => {
+                    focusModal.classList.remove('opacity-0');
+                }, 10);
+            }
+
+            focusCard.classList.remove('animate-pop-in');
+            void focusCard.offsetWidth;
+            focusCard.classList.add('animate-pop-in');
+
+            playChime(587.33, 0.15);
+        }
+
+        function closeFocusModal() {
+            isFocusMode = false;
+            focusModal.classList.add('opacity-0');
+            setTimeout(() => {
+                focusModal.classList.add('hidden');
+            }, 300);
+        }
+
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-white border-2 border-emerald-300 px-5 py-2.5 rounded-2xl shadow-xl z-50 font-black text-base flex items-center space-x-2 animate-bounce';
+            toast.innerHTML = `<span>${message}</span>`;
+            document.body.appendChild(toast);
+            setTimeout(() => {
+                toast.remove();
+            }, 2400);
+        }
+
+        function openEditModal() {
+            editCardsTextarea.value = ROW_GROUPS.map(g => g.join(', ')).join('\n');
+            editModal.classList.remove('hidden');
+        }
+
+        function closeEditModal() {
+            editModal.classList.add('hidden');
+        }
+
+        function saveEditedCards() {
+            const lines = editCardsTextarea.value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            const newGroups = [];
+
+            lines.forEach(line => {
+                const items = line.split(',').map(s => s.trim()).filter(s => s.length > 0);
+                if (items.length > 0) {
+                    newGroups.push(items);
+                }
+            });
+
+            if (newGroups.length === 0) {
+                showToast('❌ 請至少輸入一組有效的鼻化母音字母！');
+                return;
+            }
+
+            ROW_GROUPS.length = 0;
+            newGroups.forEach(g => ROW_GROUPS.push(g));
+
+            flattenConsonants();
+            drawnIndices.clear();
+            closeEditModal();
+            renderRows();
+            showToast('✅ 已成功變更鼻化母音內容！');
+        }
+
+        function setupEventListeners() {
+            closeFocusModalBtn.onclick = (e) => {
+                e.stopPropagation();
+                closeFocusModal();
+            };
+
+            resetDrawsBtn.onclick = (e) => {
+                e.stopPropagation();
+                drawnIndices.clear();
+                renderRows();
+                showToast('已重置所有練習紀錄');
+            };
+
+            openEditBtn.onclick = (e) => {
+                e.stopPropagation();
+                openEditModal();
+            };
+            closeEditModalBtn.onclick = closeEditModal;
+            cancelEditBtn.onclick = closeEditModal;
+            saveEditBtn.onclick = saveEditedCards;
+
+            restoreDefaultCardsBtn.onclick = () => {
+                ROW_GROUPS.length = 0;
+                [
+                    ['aⁿ', 'iⁿ', 'oⁿ', 'eⁿ'],
+                    ['aiⁿ', 'iaⁿ', 'iuⁿ', 'uiⁿ'],
+                    ['oaⁿ', 'iauⁿ', 'oaiⁿ']
+                ].forEach(g => ROW_GROUPS.push(g));
+                
+                flattenConsonants();
+                drawnIndices.clear();
+                openEditModal();
+                showToast('已恢復預設鼻化母音');
+            };
+
+            // Global Left-Click listener anywhere on the screen
+            document.addEventListener('click', (e) => {
+                if (!editModal.classList.contains('hidden')) return;
+
+                if (e.target.closest('#resetDrawsBtn') || 
+                    e.target.closest('#openEditBtn') || 
+                    e.target.closest('#closeFocusModalBtn')) {
+                    return;
+                }
+
+                drawNextRandomCard();
+            });
+
+            // Global Right-Click listener anywhere on the screen
+            document.addEventListener('contextmenu', (e) => {
+                if (!editModal.classList.contains('hidden')) return;
+                if (editModal.contains(e.target)) return;
+
+                e.preventDefault();
+                drawNextRandomCard();
+            });
+
+            // Keyboard / Presenter Clicker listener
+            document.addEventListener('keydown', (e) => {
+                if (!editModal.classList.contains('hidden')) return;
+
+                switch (e.code) {
+                    case 'Space':
+                    case 'PageDown':
+                    case 'PageUp':
+                    case 'ArrowRight':
+                    case 'ArrowDown':
+                    case 'ArrowLeft':
+                    case 'ArrowUp':
+                        e.preventDefault();
+                        drawNextRandomCard();
+                        break;
+                    case 'Escape':
+                        if (isFocusMode) closeFocusModal();
+                        if (!editModal.classList.contains('hidden')) closeEditModal();
+                        break;
+                }
+            });
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
