@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full w-full overflow-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>白話字-子音+母音/複母音</title>
+    
+    <!-- Preload and Stylesheet for Iansui Font -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.css" as="style" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Canvas Confetti Library for Celebrations -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @font-face {
+            font-family: 'Iansui';
+            src: url('https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.woff2') format('woff2'),
+                 url('https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        :root {
+            /* Strict Viewport Budgeting for Reel Cards */
+            --item-h: clamp(140px, 38vh, 400px);
+        }
+
+        @media (max-width: 640px) {
+            :root {
+                --item-h: clamp(110px, 25vh, 200px);
+            }
+        }
+
+        body {
+            font-family: 'Iansui', sans-serif;
+            background: radial-gradient(circle at 50% 35%, #7e22ce 0%, #581c87 35%, #3b0764 70%, #090514 100%);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .neon-gold-title {
+            color: #fef08a;
+            text-shadow: 0 0 10px #facc15, 0 0 20px #eab308, 0 0 35px #ca8a04, 0 0 50px #854d0e;
+        }
+
+        .slot-frame {
+            background: linear-gradient(145deg, #4c1d95, #2e1065);
+            box-shadow: 0 0 30px #a855f7, inset 0 0 15px rgba(255, 255, 255, 0.2);
+            border: 4px solid #f3e8ff;
+        }
+
+        .led-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: blink-led 1.2s infinite alternate;
+        }
+
+        .led-dot:nth-child(even) {
+            animation-delay: 0.6s;
+        }
+
+        @keyframes blink-led {
+            0% {
+                background-color: #ec4899;
+                box-shadow: 0 0 8px #ec4899;
+            }
+            100% {
+                background-color: #c084fc;
+                box-shadow: 0 0 8px #c084fc;
+            }
+        }
+
+        .reel-viewport {
+            height: var(--item-h);
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            background: #0f172a;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8);
+        }
+
+        .reel-strip {
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+            transition: transform 1.4s cubic-bezier(0.1, 0.88, 0.25, 1);
+        }
+
+        .reel-card {
+            height: var(--item-h);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-bottom: 0.12em; /* Prevents descender text clipping (e.g. j, g, ⁿ) */
+            line-height: 1;
+        }
+
+        .card-text-welcome { font-size: calc(var(--item-h) * 0.22); }
+        .card-text-1 { font-size: calc(var(--item-h) * 0.76); }
+        .card-text-2 { font-size: calc(var(--item-h) * 0.63); }
+        .card-text-3 { font-size: calc(var(--item-h) * 0.50); }
+        .card-text-4 { font-size: calc(var(--item-h) * 0.40); }
+
+        .reel-mask-top {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 20%;
+            background: linear-gradient(to bottom, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0));
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .reel-mask-bottom {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 20%;
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.85), rgba(15, 23, 42, 0));
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .hover-target {
+            transition: all 0.2s ease;
+        }
+        .hover-target:hover {
+            box-shadow: 0 0 20px #fde047;
+            border-color: #fef08a;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a855f7;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen overflow-hidden text-white flex flex-col justify-between" id="app-root">
+
+    <!-- SECTION 1: Top Header Area (10vh) -->
+    <header class="h-[10vh] min-h-[50px] w-full flex items-center justify-between px-4 sm:px-8 pt-2 relative z-20">
+        <div class="flex-1 text-center">
+            <h1 class="neon-gold-title text-2xl sm:text-4xl md:text-5xl font-extrabold tracking-wider whitespace-nowrap truncate leading-none">
+                白話字-子音+母音/複母音
+            </h1>
+        </div>
+
+        <div class="absolute right-4 top-1/2 -translate-y-1/2 flex items-center gap-2">
+            <button id="bgm-btn" onclick="toggleBGM()" class="bg-purple-900/80 hover:bg-purple-800 border border-purple-400/50 text-xs sm:text-sm px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-lg transition transform active:scale-95">
+                <span id="bgm-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span id="bgm-label" class="font-bold">🎶 電玩風</span>
+            </button>
+            
+            <button onclick="openSettings()" class="bg-purple-900/80 hover:bg-purple-800 border border-purple-400/50 p-2 rounded-full shadow-lg transition transform active:scale-95 text-xl" title="自訂教材選單">
+                ⚙️
+            </button>
+        </div>
+    </header>
+
+    <!-- SECTION 2: Middle Main Slot Area (68vh) -->
+    <main class="h-[68vh] w-full flex items-center justify-center px-4 relative z-10">
+        <div class="slot-frame w-full max-w-4xl p-3 sm:p-6 rounded-3xl relative flex flex-col items-center">
+            
+            <div class="w-full flex justify-between px-4 pb-2">
+                <div class="led-dot"></div><div class="led-dot"></div><div class="led-dot"></div>
+                <div class="led-dot"></div><div class="led-dot"></div><div class="led-dot"></div>
+                <div class="led-dot"></div><div class="led-dot"></div><div class="led-dot"></div>
+            </div>
+
+            <div class="w-full grid grid-cols-2 gap-3 sm:gap-6 relative">
+                <!-- Left Reel Column -->
+                <div id="left-reel-box" 
+                     onmouseenter="setHoverState('left', true)" 
+                     onmouseleave="setHoverState('left', false)"
+                     onclick="handleReelClick('left')"
+                     class="hover-target relative rounded-2xl cursor-pointer border-2 border-purple-300/40 p-1 bg-purple-950/40">
+                    <div class="text-center text-xs sm:text-sm font-bold text-purple-200 mb-1 tracking-widest">子音 (Siaⁿ-bó)</div>
+                    <div class="reel-viewport">
+                        <div class="reel-mask-top"></div>
+                        <div class="reel-mask-bottom"></div>
+                        <div id="left-strip" class="reel-strip"></div>
+                    </div>
+                </div>
+
+                <!-- Right Reel Column -->
+                <div id="right-reel-box" 
+                     onmouseenter="setHoverState('right', true)" 
+                     onmouseleave="setHoverState('right', false)"
+                     onclick="handleReelClick('right')"
+                     class="hover-target relative rounded-2xl cursor-pointer border-2 border-purple-300/40 p-1 bg-purple-950/40">
+                    <div class="text-center text-xs sm:text-sm font-bold text-purple-200 mb-1 tracking-widest">母音/複母音 (Ūn-bó)</div>
+                    <div class="reel-viewport">
+                        <div class="reel-mask-top"></div>
+                        <div class="reel-mask-bottom"></div>
+                        <div id="right-strip" class="reel-strip"></div>
+                    </div>
+                </div>
+
+                <div id="spin-shield" class="hidden absolute inset-0 bg-transparent z-30 pointer-events-auto"></div>
+            </div>
+
+            <div class="w-full flex justify-between px-4 pt-2">
+                <div class="led-dot"></div><div class="led-dot"></div><div class="led-dot"></div>
+                <div class="led-dot"></div><div class="led-dot"></div><div class="led-dot"></div>
+                <div class="led-dot"></div><div class="led-dot"></div><div class="led-dot"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- SECTION 3: Bottom Control Area (22vh) -->
+    <footer class="h-[22vh] w-full flex flex-col justify-end items-center pb-8 px-4 z-20 gap-3">
+        <div class="flex items-center gap-4">
+            <button id="spin-btn" onclick="handleMainLoopTrigger()" 
+                    class="bg-gradient-to-r from-yellow-400 via-amber-500 to-orange-600 hover:from-yellow-300 hover:to-orange-500 text-purple-950 font-black text-lg sm:text-2xl px-8 py-3 rounded-full shadow-2xl border-2 border-white/80 transition transform active:scale-95 flex items-center gap-2">
+                <span>🎰</span>
+                <span id="spin-btn-text">Tâng-chê tńg!</span>
+            </button>
+
+            <button onclick="toggleChart(true)" 
+                    class="bg-purple-900/90 hover:bg-purple-800 border border-purple-300/60 text-yellow-300 font-bold text-base sm:text-lg px-5 py-3 rounded-full shadow-xl transition transform active:scale-95 flex items-center gap-2">
+                <span>📋</span>
+                <span>對照字表</span>
+            </button>
+        </div>
+
+        <div class="w-full max-w-2xl flex items-center justify-between px-2 pt-1" id="progress-dots-container"></div>
+    </footer>
+
+    <!-- SECTION 4: Reference Chart Overlay -->
+    <div id="chart-overlay" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex flex-col items-center justify-center p-4">
+        <div class="bg-purple-950 border-2 border-purple-400/80 rounded-3xl max-w-5xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl relative">
+            <div class="p-4 border-b border-purple-800 flex items-center justify-between bg-purple-900/50">
+                <h2 class="text-xl sm:text-2xl font-bold text-yellow-300 flex items-center gap-2">
+                    <span>📋</span> 白話字拼音對照表 (90% 精緻縮小版)
+                </h2>
+                <button onclick="toggleChart(false)" class="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-1.5 rounded-full text-base transition">
+                    關閉 ✕
+                </button>
+            </div>
+
+            <div class="p-4 overflow-y-auto custom-scrollbar flex-1 space-y-6">
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-purple-200 mb-2 border-l-4 border-yellow-400 pl-2">常用聲母 (Consonants)</h3>
+                    <div id="chart-left-list" class="grid grid-cols-3 sm:grid-cols-6 gap-2"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-purple-200 mb-2 border-l-4 border-amber-400 pl-2">常用韻母 (Vowels)</h3>
+                    <div id="chart-right-list" class="grid grid-cols-4 sm:grid-cols-8 gap-2"></div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm sm:text-base font-bold text-purple-200 mb-2 border-l-4 border-pink-400 pl-2">聲韻組合矩陣 (組合示範)</h3>
+                    <div id="chart-matrix" class="overflow-x-auto pb-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECTION 5: Custom Material Settings Panel Modal -->
+    <div id="settings-overlay" class="hidden fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-purple-950 border-2 border-purple-400/80 rounded-3xl max-w-2xl w-full p-6 shadow-2xl flex flex-col gap-5">
+            <div class="flex items-center justify-between border-b border-purple-800 pb-3">
+                <h2 class="text-xl font-bold text-yellow-300 flex items-center gap-2">
+                    <span>⚙️</span> 教材獨立編輯面板
+                </h2>
+                <button onclick="closeSettings()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold px-3 py-1 rounded-full text-sm">
+                    ✕ 關閉
+                </button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-purple-200 mb-1">左欄聲母項目 (以逗號隔開)：</label>
+                    <textarea id="left-material-input" rows="3" onfocus="setIsInputFocused(true)" onblur="setIsInputFocused(false)"
+                              class="w-full bg-slate-900 border border-purple-500 rounded-xl p-3 text-yellow-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 custom-scrollbar"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-purple-200 mb-1">右欄韻母項目 (以逗號隔開)：</label>
+                    <textarea id="right-material-input" rows="3" onfocus="setIsInputFocused(true)" onblur="setIsInputFocused(false)"
+                              class="w-full bg-slate-900 border border-purple-500 rounded-xl p-3 text-yellow-200 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 custom-scrollbar"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between pt-2">
+                <button onclick="resetDefaultMaterials()" class="bg-red-900/80 hover:bg-red-800 border border-red-500 text-red-200 font-bold px-4 py-2 rounded-xl text-sm transition">
+                    重置為預設教材
+                </button>
+                <button onclick="saveSettings()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-6 py-2 rounded-xl text-sm transition shadow-lg">
+                    儲存並重新載入
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* Default Materials & Storage Isolation Keys */
+        const STORAGE_KEY_LEFT = 'slot_left_donggang_v2';
+        const STORAGE_KEY_RIGHT = 'slot_right_donggang_v2';
+
+        const DEFAULT_LEFT = ['th', 'kh', 'ch', 'chh', 's', 'th', 'kh', 'ch', 'chh', 's'];
+        const DEFAULT_RIGHT = ['a', 'i', 'u', 'o͘', 'e', 'o', 'ai', 'au', 'a', 'i', 'u', 'o͘', 'e', 'o', 'ai', 'au'];
+
+        let leftList = [];
+        let rightList = [];
+
+        let currentQuestion = 0;
+        const TOTAL_QUESTIONS = 20;
+        
+        /* Game Sub-States: 'IDLE' | 'SPINNING' | 'REVEALED' | 'CELEBRATED' | 'FINISHED' */
+        let gameState = 'IDLE';
+
+        let hoverLeft = false;
+        let hoverRight = false;
+        let isInputFocused = false;
+
+        let leftCurrentCard = 'Chún-pī';
+        let rightCurrentCard = 'Khai-sí';
+
+        /* Track last landed card index for seamless position reset */
+        let lastIndices = { left: null, right: null };
+
+        /* Web Audio API Sound System */
+        let audioCtx = null;
+        let isBgmOn = true;
+        let bgmInterval = null;
+        let bgmStep = 0;
+
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContext();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        // Spin Tick Sound
+        function playTickSound() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(650, audioCtx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.03);
+                
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.03);
+            } catch (e) {}
+        }
+
+        // Victory Chord Sound (Stage 2 Celebration)
+        function playVictoryChord() {
+            if (!audioCtx) return;
+            try {
+                const now = audioCtx.currentTime;
+                // C Major Triad Arpeggio + Chord: C5, E5, G5, C6
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+                    
+                    gain.gain.setValueAtTime(0, now + idx * 0.08);
+                    gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.08 + 0.03);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.6);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start(now + idx * 0.08);
+                    osc.stop(now + idx * 0.08 + 0.65);
+                });
+            } catch (e) {}
+        }
+
+        // Trigger Confetti Blast from left and right edges
+        function triggerConfetti() {
+            if (typeof confetti === 'function') {
+                confetti({
+                    particleCount: 50,
+                    angle: 60,
+                    spread: 60,
+                    origin: { x: 0.05, y: 0.65 }
+                });
+                confetti({
+                    particleCount: 50,
+                    angle: 120,
+                    spread: 60,
+                    origin: { x: 0.95, y: 0.65 }
+                });
+            }
+        }
+
+        // Synth Arcade Background Music
+        function startArcadeBGM() {
+            if (bgmInterval) clearInterval(bgmInterval);
+            const bassNotes = [130.81, 164.81, 196.00, 220.00, 196.00, 164.81];
+            bgmStep = 0;
+
+            bgmInterval = setInterval(() => {
+                if (!isBgmOn || !audioCtx || audioCtx.state !== 'running') return;
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    const freq = bassNotes[bgmStep % bassNotes.length];
+                    osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.12);
+                    bgmStep++;
+                } catch (e) {}
+            }, 220);
+        }
+
+        function toggleBGM() {
+            initAudio();
+            isBgmOn = !isBgmOn;
+            const indicator = document.getElementById('bgm-indicator');
+            const label = document.getElementById('bgm-label');
+            if (isBgmOn) {
+                indicator.className = "w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse";
+                label.innerText = "🎶 電玩風";
+                startArcadeBGM();
+            } else {
+                indicator.className = "w-2.5 h-2.5 rounded-full bg-gray-500";
+                label.innerText = "🔇 已靜音";
+            }
+        }
+
+        function loadMaterials() {
+            try {
+                const savedLeft = localStorage.getItem(STORAGE_KEY_LEFT);
+                const savedRight = localStorage.getItem(STORAGE_KEY_RIGHT);
+                leftList = savedLeft ? JSON.parse(savedLeft) : [...DEFAULT_LEFT];
+                rightList = savedRight ? JSON.parse(savedRight) : [...DEFAULT_RIGHT];
+            } catch (e) {
+                leftList = [...DEFAULT_LEFT];
+                rightList = [...DEFAULT_RIGHT];
+            }
+        }
+
+        function getCardTextClass(text) {
+            if (text === 'Chún-pī' || text === 'Khai-sí' || text === 'Oân-sêng!') {
+                return 'card-text-welcome font-bold text-yellow-300';
+            }
+            const len = text.length;
+            if (len === 1) return 'card-text-1 font-bold text-white';
+            if (len === 2) return 'card-text-2 font-bold text-white';
+            if (len === 3) return 'card-text-3 font-bold text-white';
+            return 'card-text-4 font-bold text-white';
+        }
+
+        function buildStripHTML(items, welcomeText) {
+            let html = '';
+            html += `<div class="reel-card bg-slate-900 border-y border-purple-900/50">
+                        <span class="${getCardTextClass(welcomeText)}">${welcomeText}</span>
+                     </div>`;
+
+            for (let loop = 0; loop < 15; loop++) {
+                items.forEach((item) => {
+                    html += `<div class="reel-card bg-slate-900 border-y border-purple-900/50">
+                                <span class="${getCardTextClass(item)}">${item}</span>
+                             </div>`;
+                });
+            }
+
+            html += `<div class="reel-card bg-slate-900 border-y border-purple-900/50">
+                        <span class="${getCardTextClass('Oân-sêng!')}">Oân-sêng!</span>
+                     </div>`;
+            return html;
+        }
+
+        function renderReels() {
+            const leftStrip = document.getElementById('left-strip');
+            const rightStrip = document.getElementById('right-strip');
+
+            lastIndices = { left: null, right: null };
+
+            leftStrip.innerHTML = buildStripHTML(leftList, 'Chún-pī');
+            rightStrip.innerHTML = buildStripHTML(rightList, 'Khai-sí');
+
+            leftStrip.style.transition = 'none';
+            rightStrip.style.transition = 'none';
+            leftStrip.style.transform = `translateY(0%)`;
+            rightStrip.style.transform = `translateY(0%)`;
+        }
+
+        function setShield(active) {
+            const shield = document.getElementById('spin-shield');
+            if (active) shield.classList.remove('hidden');
+            else shield.classList.add('hidden');
+        }
+
+        function spinReel(side, targetItemIndex) {
+            const items = side === 'left' ? leftList : rightList;
+            const strip = document.getElementById(side === 'left' ? 'left-strip' : 'right-strip');
+            const totalCardsInStrip = 1 + (items.length * 15) + 1;
+
+            const prevIndex = lastIndices[side];
+            lastIndices[side] = targetItemIndex;
+
+            // Seamlessly snap back to loop 1 position without transition
+            const startCardPos = (prevIndex !== null && prevIndex !== undefined) ? (1 + items.length * 1 + prevIndex) : 0;
+            const startTranslateY = -((startCardPos) / totalCardsInStrip) * 100;
+
+            // Target loop 11 (traversing 10 full loops in 1.4s for extreme speed)
+            const targetCardPos = 1 + (items.length * 11) + targetItemIndex;
+            const targetTranslateY = -((targetCardPos) / totalCardsInStrip) * 100;
+
+            // Reset position instantly
+            strip.style.transition = 'none';
+            strip.style.transform = `translateY(${startTranslateY}%)`;
+
+            // Force DOM reflow to apply instant position reset
+            void strip.offsetHeight;
+
+            // Apply 1.4s high-speed cubic-bezier sprint
+            strip.style.transition = 'transform 1.4s cubic-bezier(0.1, 0.88, 0.25, 1)';
+            strip.style.transform = `translateY(${targetTranslateY}%)`;
+
+            // Rapid consecutive arcade tick sound effect (1.4s total duration)
+            let ticks = 0;
+            const maxTicks = 42;
+            const tickInterval = setInterval(() => {
+                playTickSound();
+                ticks++;
+                if (ticks >= maxTicks) clearInterval(tickInterval);
+            }, 32);
+        }
+
+        function startSpinningPhase() {
+            gameState = 'SPINNING';
+            setShield(true);
+            updateButtonUI();
+
+            const leftRand = Math.floor(Math.random() * leftList.length);
+            const rightRand = Math.floor(Math.random() * rightList.length);
+
+            leftCurrentCard = leftList[leftRand];
+            rightCurrentCard = rightList[rightRand];
+
+            spinReel('left', leftRand);
+            spinReel('right', rightRand);
+
+            setTimeout(() => {
+                gameState = 'REVEALED';
+                setShield(false);
+                updateButtonUI();
+            }, 1450);
+        }
+
+        function spinSingle(side) {
+            initAudio();
+            if (gameState === 'SPINNING') return;
+
+            gameState = 'SPINNING';
+            setShield(true);
+            updateButtonUI();
+
+            const items = side === 'left' ? leftList : rightList;
+            const randIndex = Math.floor(Math.random() * items.length);
+            
+            if (side === 'left') leftCurrentCard = items[randIndex];
+            else rightCurrentCard = items[randIndex];
+
+            spinReel(side, randIndex);
+
+            setTimeout(() => {
+                gameState = 'REVEALED';
+                setShield(false);
+                updateButtonUI();
+            }, 1450);
+        }
+
+        function showCompletion() {
+            const leftStrip = document.getElementById('left-strip');
+            const rightStrip = document.getElementById('right-strip');
+            const leftTotal = 1 + (leftList.length * 15) + 1;
+            const rightTotal = 1 + (rightList.length * 15) + 1;
+
+            leftStrip.style.transform = `translateY(-${((leftTotal - 1) / leftTotal) * 100}%)`;
+            rightStrip.style.transform = `translateY(-${((rightTotal - 1) / rightTotal) * 100}%)`;
+        }
+
+        /* Synchronized 3-Click Main Loop for Presenter Clicker */
+        function handleMainLoopTrigger() {
+            initAudio();
+            if (isInputFocused) return;
+
+            if (gameState === 'IDLE') {
+                // Click 1: Start Question 1 Spin
+                currentQuestion = 1;
+                startSpinningPhase();
+            } else if (gameState === 'REVEALED') {
+                // Click 2: Celebration & Scoring
+                gameState = 'CELEBRATED';
+                triggerConfetti();
+                playVictoryChord();
+                updateProgressDots(); // Lights up the current question dot
+                updateButtonUI();
+            } else if (gameState === 'CELEBRATED') {
+                // Click 3: Next Question
+                if (currentQuestion >= TOTAL_QUESTIONS) {
+                    gameState = 'FINISHED';
+                    showCompletion();
+                    updateButtonUI();
+                } else {
+                    currentQuestion++;
+                    startSpinningPhase();
+                }
+            } else if (gameState === 'FINISHED') {
+                // Reset Game
+                currentQuestion = 0;
+                gameState = 'IDLE';
+                renderReels();
+                updateProgressDots();
+                updateButtonUI();
+            }
+        }
+
+        function updateButtonUI() {
+            const btnText = document.getElementById('spin-btn-text');
+            if (!btnText) return;
+
+            if (gameState === 'SPINNING') {
+                btnText.innerText = "旋轉中...";
+            } else if (gameState === 'REVEALED') {
+                btnText.innerText = `🎉✨ (${currentQuestion}/${TOTAL_QUESTIONS})`;
+            } else if (gameState === 'CELEBRATED') {
+                btnText.innerText = currentQuestion >= TOTAL_QUESTIONS ? "🏆 通關完成！" : `➡️ 下一題 (${currentQuestion}/${TOTAL_QUESTIONS})`;
+            } else if (gameState === 'FINISHED') {
+                btnText.innerText = "🔄 重新開局";
+            } else {
+                btnText.innerText = "🎰 起轉 Tâng-chê tńg!";
+            }
+        }
+
+        function renderProgressDots() {
+            const container = document.getElementById('progress-dots-container');
+            let html = '';
+            for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
+                html += `<div id="dot-${i}" class="w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-purple-300/40 bg-purple-950/80 transition-all duration-300"></div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        function updateProgressDots() {
+            for (let i = 1; i <= TOTAL_QUESTIONS; i++) {
+                const dot = document.getElementById(`dot-${i}`);
+                if (!dot) continue;
+                if (i < currentQuestion || (i === currentQuestion && (gameState === 'CELEBRATED' || gameState === 'FINISHED'))) {
+                    dot.className = "w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-amber-400 border border-yellow-200 shadow-[0_0_10px_#facc15] scale-110 transition-all duration-300";
+                } else {
+                    dot.className = "w-3 h-3 sm:w-4 sm:h-4 rounded-full border border-purple-300/40 bg-purple-950/80 transition-all duration-300";
+                }
+            }
+        }
+
+        function setHoverState(side, state) {
+            if (side === 'left') hoverLeft = state;
+            if (side === 'right') hoverRight = state;
+        }
+
+        function handleReelClick(side) {
+            initAudio();
+            if (gameState === 'SPINNING') return;
+
+            if (side === 'left' && hoverLeft) {
+                spinSingle('left');
+            } else if (side === 'right' && hoverRight) {
+                spinSingle('right');
+            } else {
+                handleMainLoopTrigger();
+            }
+        }
+
+        /* Global Click Listener: Clicking outside reels triggers dual spin */
+        document.addEventListener('click', (e) => {
+            const settingsModal = document.getElementById('settings-overlay');
+            const chartModal = document.getElementById('chart-overlay');
+            if ((settingsModal && !settingsModal.classList.contains('hidden')) || 
+                (chartModal && !chartModal.classList.contains('hidden'))) {
+                return;
+            }
+
+            if (e.target.closest('#left-reel-box') || 
+                e.target.closest('#right-reel-box') || 
+                e.target.closest('button') || 
+                e.target.closest('textarea') || 
+                e.target.closest('input')) {
+                return;
+            }
+
+            handleMainLoopTrigger();
+        });
+
+        // Keyboard & Remote Presenter Clicker Listener
+        document.addEventListener('keydown', (e) => {
+            if (isInputFocused) return;
+            const settingsModal = document.getElementById('settings-overlay');
+            const chartModal = document.getElementById('chart-overlay');
+            if (!settingsModal.classList.contains('hidden') || !chartModal.classList.contains('hidden')) return;
+
+            const clickerKeys = ['PageDown', 'PageUp', 'Space', 'Enter', 'ArrowDown', 'ArrowUp', 'ArrowLeft', 'ArrowRight', ' '];
+            if (clickerKeys.includes(e.key) || e.code === 'Space') {
+                e.preventDefault();
+                
+                if (hoverLeft) {
+                    spinSingle('left');
+                } else if (hoverRight) {
+                    spinSingle('right');
+                } else {
+                    handleMainLoopTrigger();
+                }
+            }
+        });
+
+        function toggleChart(show) {
+            initAudio();
+            const overlay = document.getElementById('chart-overlay');
+            if (show) {
+                renderChartData();
+                overlay.classList.remove('hidden');
+            } else {
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function renderChartData() {
+            const leftContainer = document.getElementById('chart-left-list');
+            const rightContainer = document.getElementById('chart-right-list');
+            const matrixContainer = document.getElementById('chart-matrix');
+
+            leftContainer.innerHTML = leftList.map(item => `
+                <div onclick="playTickSound()" class="bg-purple-900/60 border border-purple-500/50 rounded-xl p-2 text-center text-yellow-200 font-bold text-sm hover:bg-yellow-400 hover:text-purple-950 transition cursor-pointer whitespace-nowrap overflow-hidden">
+                    ${item}
+                </div>
+            `).join('');
+
+            rightContainer.innerHTML = rightList.map(item => `
+                <div onclick="playTickSound()" class="bg-purple-900/60 border border-purple-500/50 rounded-xl p-2 text-center text-amber-200 font-bold text-sm hover:bg-amber-400 hover:text-purple-950 transition cursor-pointer whitespace-nowrap overflow-hidden">
+                    ${item}
+                </div>
+            `).join('');
+
+            let tableHTML = `<table class="w-full border-collapse text-center text-xs sm:text-sm">
+                <thead>
+                    <tr>
+                        <th class="p-2 border border-purple-800 bg-purple-900 text-yellow-300 font-bold whitespace-nowrap">聲\\韻</th>
+                        ${rightList.map(r => `<th class="p-2 border border-purple-800 bg-purple-900/80 text-amber-200 font-bold whitespace-nowrap">${r}</th>`).join('')}
+                    </tr>
+                </thead>
+                <tbody>`;
+
+            leftList.forEach(l => {
+                tableHTML += `<tr>
+                    <td class="p-2 border border-purple-800 bg-purple-900/80 font-bold text-yellow-200 whitespace-nowrap">${l}</td>`;
+                rightList.forEach(r => {
+                    tableHTML += `<td onclick="playTickSound()" class="p-2 border border-purple-800/60 bg-purple-950/40 text-purple-100 hover:bg-yellow-400 hover:text-purple-950 transition cursor-pointer whitespace-nowrap overflow-hidden font-bold min-w-[50px]">
+                        ${l}${r}
+                    </td>`;
+                });
+                tableHTML += `</tr>`;
+            });
+
+            tableHTML += `</tbody></table>`;
+            matrixContainer.innerHTML = tableHTML;
+        }
+
+        function openSettings() {
+            initAudio();
+            document.getElementById('left-material-input').value = leftList.join(', ');
+            document.getElementById('right-material-input').value = rightList.join(', ');
+            document.getElementById('settings-overlay').classList.remove('hidden');
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-overlay').classList.add('hidden');
+            setIsInputFocused(false);
+        }
+
+        function setIsInputFocused(state) {
+            isInputFocused = state;
+        }
+
+        function saveSettings() {
+            const leftVal = document.getElementById('left-material-input').value;
+            const rightVal = document.getElementById('right-material-input').value;
+
+            const newLeft = leftVal.split(',').map(s => s.trim()).filter(Boolean);
+            const newRight = rightVal.split(',').map(s => s.trim()).filter(Boolean);
+
+            if (newLeft.length === 0 || newRight.length === 0) {
+                alert('請輸入有效的教材項目！');
+                return;
+            }
+
+            leftList = newLeft;
+            rightList = newRight;
+
+            localStorage.setItem(STORAGE_KEY_LEFT, JSON.stringify(leftList));
+            localStorage.setItem(STORAGE_KEY_RIGHT, JSON.stringify(rightList));
+
+            currentQuestion = 0;
+            gameState = 'IDLE';
+            renderReels();
+            updateProgressDots();
+            updateButtonUI();
+            closeSettings();
+        }
+
+        function resetDefaultMaterials() {
+            document.getElementById('left-material-input').value = DEFAULT_LEFT.join(', ');
+            document.getElementById('right-material-input').value = DEFAULT_RIGHT.join(', ');
+        }
+
+        window.onload = function() {
+            loadMaterials();
+            renderReels();
+            renderProgressDots();
+            updateButtonUI();
+
+            const startInteractionHandler = () => {
+                initAudio();
+                if (isBgmOn) startArcadeBGM();
+                window.removeEventListener('click', startInteractionHandler);
+                window.removeEventListener('keydown', startInteractionHandler);
+            };
+
+            window.addEventListener('click', startInteractionHandler);
+            window.addEventListener('keydown', startInteractionHandler);
+        };
+    </script>
+</body>
+</html>
