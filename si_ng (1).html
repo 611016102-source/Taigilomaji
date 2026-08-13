@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Siōng好食ê台灣美食</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts for Retro Taiwanese Calligraphy & Handdrawn Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Zen+Kurenaido&family=Noto+Serif+TC:wght@600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Klee One', 'Noto Serif TC', serif;
+            background-color: #fcf9f2;
+            /* Retro Kraft Paper / Grid texture overlay */
+            background-image: 
+                radial-gradient(#d6c0a0 0.75px, transparent 0.75px),
+                radial-gradient(#d6c0a0 0.75px, #fcf9f2 0.75px);
+            background-size: 30px 30px;
+            background-position: 0 0, 15px 15px;
+            user-select: none;
+            -webkit-user-select: none;
+            overflow-x: hidden;
+        }
+
+        .title-font {
+            font-family: 'Noto Serif TC', serif;
+        }
+
+        .handwritten {
+            font-family: 'Klee One', 'Zen Kurenaido', serif;
+        }
+
+        /* Pointer arrow animation bounce */
+        @keyframes pointerPulse {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-6px) scale(1.05); }
+        }
+
+        .animate-pointer {
+            animation: pointerPulse 1.8s infinite ease-in-out;
+        }
+
+        /* Vintage Red Stamp Border Effect */
+        .stamp-border {
+            border: 3px solid #8c110b;
+            box-shadow: inset 0 0 0 2px #f4c430, 0 8px 20px rgba(140, 17, 11, 0.15);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between items-center relative cursor-pointer" onclick="handleGlobalClick(event)">
+
+    <!-- Fullscreen Confetti / Particle Canvas -->
+    <canvas id="celebrationCanvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+    <!-- Top Bar Title Area -->
+    <header class="w-full pt-6 pb-2 px-6 flex justify-between items-center z-10">
+        <div class="bg-[#8c110b] text-[#f4c430] px-5 py-2.5 rounded-2xl stamp-border flex items-center gap-3 shadow-lg transform -rotate-1">
+            <span class="text-2xl sm:text-3xl font-black title-font tracking-wide">Siōng好食ê台灣美食</span>
+            <span class="text-xl sm:text-2xl">🇹🇼</span>
+        </div>
+        <div class="hidden sm:block text-xs text-[#8c110b] font-bold tracking-widest bg-[#fcefdc] px-3 py-1.5 rounded-full border border-[#e2d4be]">
+            點擊螢幕任何地方旋轉
+        </div>
+    </header>
+
+    <!-- Main Center Stage with Wheel -->
+    <main class="flex-1 flex flex-col items-center justify-center relative w-full max-w-2xl px-4 py-2">
+        
+        <!-- Roulette Wheel Container -->
+        <div class="relative flex items-center justify-center my-auto">
+            
+            <!-- Top Pointer Arrow (Pointing down to 12 o'clock segment) -->
+            <div class="absolute -top-7 z-30 flex flex-col items-center animate-pointer filter drop-shadow-md">
+                <div class="w-10 h-12 bg-[#8c110b] clip-arrow border-2 border-[#f4c430] flex items-center justify-center rounded-t-md" style="clip-path: polygon(0% 0%, 100% 0%, 50% 100%);">
+                </div>
+                <div class="w-4 h-4 rounded-full bg-[#f4c430] border-2 border-[#8c110b] -mt-10"></div>
+            </div>
+
+            <!-- Decorative Outer Ring Frame -->
+            <div class="p-3 sm:p-5 rounded-full bg-gradient-to-tr from-[#8c110b] via-[#b81d13] to-[#8c110b] shadow-2xl border-4 border-[#f4c430]">
+                <!-- Wheel Canvas -->
+                <canvas id="wheelCanvas" width="460" height="460" class="max-w-[85vw] max-h-[85vw] sm:w-[460px] sm:h-[460px] rounded-full transition-transform duration-75"></canvas>
+            </div>
+        </div>
+
+        <!-- Hint Text at Bottom of Stage -->
+        <div class="mt-4 text-center">
+            <p class="text-sm sm:text-base font-bold text-[#8c110b] bg-[#f8ebd5] px-4 py-1.5 rounded-full border border-[#d6be9a] inline-block shadow-sm">
+                👆 點擊螢幕任何地方開始抽獎
+            </p>
+        </div>
+    </main>
+
+    <!-- Winner Result Modal Popup -->
+    <div id="winnerModal" class="fixed inset-0 z-40 hidden flex items-center justify-center p-4 bg-black/60 backdrop-blur-md transition-all duration-300">
+        <div id="modalCard" class="bg-[#fcf9f2] border-4 border-[#8c110b] rounded-3xl p-6 sm:p-8 max-w-sm sm:max-w-md w-full shadow-2xl text-center transform scale-95 opacity-0 transition-all duration-300 relative">
+            
+            <!-- Modal Header Title -->
+            <div class="mb-3">
+                <span class="inline-block px-4 py-1 bg-[#8c110b] text-[#f4c430] text-sm font-bold rounded-full mb-1">恭喜中獎</span>
+                <h2 class="text-3xl sm:text-4xl font-black text-[#8c110b] title-font tracking-wider flex items-center justify-center gap-2">
+                    <span>🎉</span> Góa chai-iáⁿ! <span>🎉</span>
+                </h2>
+            </div>
+
+            <!-- Food Card Photo Image (Direct Original Image) -->
+            <div class="my-4 flex justify-center items-center">
+                <div class="p-2 bg-white rounded-2xl shadow-md border-2 border-[#e2d4be] max-w-full">
+                    <img id="winnerPhotoImg" src="" alt="Winner Food" class="max-w-full max-h-[60vh] w-auto h-auto object-contain rounded-xl block mx-auto">
+                </div>
+            </div>
+
+            <p class="mt-4 text-xs text-[#8c110b] opacity-80 font-bold">（點擊螢幕任何地方繼續）</p>
+        </div>
+    </div>
+
+    <script>
+        // 10 Taiwanese Foods strictly using user provided images (11.jpg ~ 20.jpg)
+        const taiwanFoods = [
+            { number: 1, name: "Gû-bah-mī", zhName: "牛肉麵", emoji: "🍜", img: "11.jpg" },
+            { number: 2, name: "Pau-á-kián", zhName: "小籠包", emoji: "🥟", img: "12.jpg" },
+            { number: 3, name: "Chin-chu-leng-tê", zhName: "珍珠奶茶", emoji: "🧋", img: "13.jpg" },
+            { number: 4, name: "Bah-sò-pñg", zhName: "滷肉飯", emoji: "🍚", img: "14.jpg" },
+            { number: 5, name: "Kiâm-so-ke", zhName: "鹹酥雞", emoji: "🍗", img: "15.jpg" },
+            { number: 6, name: "Koah-pau", zhName: "刈包", emoji: "🥙", img: "16.jpg" },
+            { number: 7, name: "Chhang-á-pián", zhName: "蔥油餅", emoji: "🫓", img: "17.jpg" },
+            { number: 8, name: "Ô-á-chian", zhName: "蚵仔煎", emoji: "🦪", img: "18.jpg" },
+            { number: 9, name: "Chhàu-tāu-hū", zhName: "臭豆腐", emoji: "🧈", img: "19.jpg" },
+            { number: 10, name: "Soāiⁿ-á-peng", zhName: "芒果冰", emoji: "🍧", img: "20.jpg" }
+        ];
+
+        // Preload user images directly without any online fallbacks
+        taiwanFoods.forEach(food => {
+            const imgObj = new Image();
+            imgObj.src = food.img;
+            imgObj.onload = () => {
+                if (typeof drawWheel === 'function') drawWheel();
+            };
+            food.imgObj = imgObj;
+        });
+
+        let canvas, ctx;
+        let currentAngle = 0; // Radians
+        let isSpinning = false;
+        let isModalOpen = false;
+        let lastTickSector = -1;
+        let audioCtx = null;
+
+        const numSlices = taiwanFoods.length;
+        const sliceAngle = (2 * Math.PI) / numSlices;
+
+        const sectorColors = [
+            '#8c110b', '#f4c430', '#b81d13', '#fdfbf7', '#8c110b',
+            '#f4c430', '#b81d13', '#fdfbf7', '#8c110b', '#f4c430'
+        ];
+
+        const textColors = [
+            '#f4c430', '#8c110b', '#fdfbf7', '#8c110b', '#f4c430',
+            '#8c110b', '#fdfbf7', '#8c110b', '#f4c430', '#8c110b'
+        ];
+
+        function drawWheel() {
+            if (!canvas) return;
+            const size = canvas.width;
+            const center = size / 2;
+            const radius = center - 12;
+
+            ctx.clearRect(0, 0, size, size);
+
+            for (let i = 0; i < numSlices; i++) {
+                const startAngle = currentAngle + i * sliceAngle;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(center, center);
+                ctx.arc(center, center, radius, startAngle, endAngle);
+                ctx.closePath();
+                ctx.fillStyle = sectorColors[i];
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#8c110b';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(center, center);
+                ctx.rotate(startAngle + sliceAngle / 2);
+
+                // Number badge
+                ctx.beginPath();
+                ctx.arc(radius - 24, 0, 15, 0, 2 * Math.PI);
+                ctx.fillStyle = (sectorColors[i] === '#8c110b' || sectorColors[i] === '#b81d13') ? '#f4c430' : '#8c110b';
+                ctx.fill();
+
+                ctx.fillStyle = (sectorColors[i] === '#8c110b' || sectorColors[i] === '#b81d13') ? '#8c110b' : '#f4c430';
+                ctx.font = 'bold 15px "Noto Serif TC", serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(taiwanFoods[i].number, radius - 24, 1);
+
+                // Draw raw photo directly onto wheel slice if loaded
+                const foodItem = taiwanFoods[i];
+                if (foodItem.imgObj && foodItem.imgObj.complete && foodItem.imgObj.naturalWidth !== 0) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(radius - 68, 0, 24, 0, 2 * Math.PI);
+                    ctx.clip();
+                    
+                    // Draw original photo image maintaining clean proportions
+                    ctx.drawImage(foodItem.imgObj, radius - 92, -24, 48, 48);
+                    ctx.restore();
+
+                    // Photo circular gold border
+                    ctx.beginPath();
+                    ctx.arc(radius - 68, 0, 24, 0, 2 * Math.PI);
+                    ctx.lineWidth = 2;
+                    ctx.strokeStyle = '#f4c430';
+                    ctx.stroke();
+                } else {
+                    // Fallback Emoji if photo loading
+                    ctx.font = '24px serif';
+                    ctx.fillText(foodItem.emoji, radius - 68, 0);
+                }
+
+                // Food Name Text
+                ctx.fillStyle = textColors[i];
+                ctx.font = 'bold 14px "Klee One", serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(foodItem.name, radius - 120, 4);
+
+                ctx.restore();
+            }
+
+            // Outer rim
+            ctx.beginPath();
+            ctx.arc(center, center, radius, 0, 2 * Math.PI);
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = '#f4c430';
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.arc(center, center, radius + 5, 0, 2 * Math.PI);
+            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#8c110b';
+            ctx.stroke();
+
+            // Center hub
+            ctx.beginPath();
+            ctx.arc(center, center, 36, 0, 2 * Math.PI);
+            ctx.fillStyle = '#b81d13';
+            ctx.fill();
+            ctx.lineWidth = 4;
+            ctx.strokeStyle = '#f4c430';
+            ctx.stroke();
+
+            ctx.fillStyle = '#f4c430';
+            ctx.font = 'bold 22px "Noto Serif TC", serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('美', center, center + 2);
+        }
+
+        function playBeep(freq = 440, duration = 0.05, type = 'sine') {
+            try {
+                if (!audioCtx) {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.005, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch (e) {}
+        }
+
+        function playWinFanfare() {
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, index) => {
+                setTimeout(() => {
+                    playBeep(freq, 0.22, 'triangle');
+                }, index * 110);
+            });
+        }
+
+        function startSpin() {
+            if (isSpinning) return;
+
+            isSpinning = true;
+            lastTickSector = -1;
+
+            const winningIndex = Math.floor(Math.random() * numSlices);
+            const fullSpins = 5 + Math.floor(Math.random() * 4);
+            const targetSectorCenter = winningIndex * sliceAngle + sliceAngle / 2;
+            
+            // Pointer at 12 o'clock (-PI/2)
+            const targetFinalAngle = (3 * Math.PI / 2) - targetSectorCenter;
+            
+            const startAnglePos = currentAngle;
+            let totalRotation = (targetFinalAngle - (startAnglePos % (2 * Math.PI))) + (fullSpins * 2 * Math.PI);
+            if (totalRotation < fullSpins * 2 * Math.PI) {
+                totalRotation += 2 * Math.PI;
+            }
+
+            const startTime = performance.now();
+            const spinDuration = 4200;
+
+            function animateWheel(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / spinDuration, 1);
+
+                const easeOut = 1 - Math.pow(1 - progress, 4);
+                currentAngle = startAnglePos + totalRotation * easeOut;
+
+                const pointerAngle = (3 * Math.PI / 2 - currentAngle) % (2 * Math.PI);
+                const normalizedPointer = (pointerAngle < 0 ? pointerAngle + 2 * Math.PI : pointerAngle);
+                const currentSector = Math.floor(normalizedPointer / sliceAngle) % numSlices;
+
+                if (currentSector !== lastTickSector) {
+                    playBeep(480 + (currentSector * 15), 0.03, 'sine');
+                    lastTickSector = currentSector;
+                }
+
+                drawWheel();
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateWheel);
+                } else {
+                    isSpinning = false;
+                    const winner = taiwanFoods[winningIndex];
+                    showWinnerModal(winner);
+                }
+            }
+
+            requestAnimationFrame(animateWheel);
+        }
+
+        function handleGlobalClick(e) {
+            if (isModalOpen) {
+                closeWinnerModal();
+                setTimeout(() => {
+                    startSpin();
+                }, 180);
+                return;
+            }
+
+            if (!isSpinning) {
+                startSpin();
+            }
+        }
+
+        function showWinnerModal(winner) {
+            isModalOpen = true;
+            playWinFanfare();
+            triggerCelebrationCanvas();
+
+            const modal = document.getElementById('winnerModal');
+            const modalCard = document.getElementById('modalCard');
+            const winnerPhotoImg = document.getElementById('winnerPhotoImg');
+
+            // Strictly point to the user's local image path
+            winnerPhotoImg.onerror = null;
+            winnerPhotoImg.src = winner.img;
+
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalCard.classList.remove('scale-95', 'opacity-0');
+                modalCard.classList.add('scale-100', 'opacity-100');
+            }, 30);
+        }
+
+        function closeWinnerModal() {
+            isModalOpen = false;
+            const modal = document.getElementById('winnerModal');
+            const modalCard = document.getElementById('modalCard');
+
+            modalCard.classList.remove('scale-100', 'opacity-100');
+            modalCard.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                stopCelebrationCanvas();
+            }, 200);
+        }
+
+        let particles = [];
+        let isCanvasAnimating = false;
+        let animationFrameId = null;
+
+        function triggerCelebrationCanvas() {
+            const canvas = document.getElementById('celebrationCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            particles = [];
+            const colors = ['#8c110b', '#b81d13', '#f4c430', '#ffffff', '#ffb6c1', '#ffa500', '#22c55e'];
+
+            for (let i = 0; i < 140; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 22,
+                    vy: (Math.random() - 0.8) * 22,
+                    size: Math.random() * 10 + 6,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    isFood: Math.random() > 0.65,
+                    foodEmoji: ['🍲', '🍜', '🧋', '🥟', '🎉', '🌟'][Math.floor(Math.random() * 6)],
+                    rotation: Math.random() * 360,
+                    rSpeed: (Math.random() - 0.5) * 8,
+                    opacity: 1
+                });
+            }
+
+            isCanvasAnimating = true;
+            renderCanvas();
+        }
+
+        function renderCanvas() {
+            if (!isCanvasAnimating) return;
+            const canvas = document.getElementById('celebrationCanvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            let aliveCount = 0;
+
+            particles.forEach(p => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.38;
+                p.rotation += p.rSpeed;
+                p.opacity -= 0.009;
+
+                if (p.opacity > 0) {
+                    aliveCount++;
+                    ctx.save();
+                    ctx.globalAlpha = Math.max(0, p.opacity);
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate((p.rotation * Math.PI) / 180);
+
+                    if (p.isFood) {
+                        ctx.font = `${p.size * 2.2}px serif`;
+                        ctx.fillText(p.foodEmoji, -p.size, p.size / 2);
+                    } else {
+                        ctx.fillStyle = p.color;
+                        ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 1.4);
+                    }
+
+                    ctx.restore();
+                }
+            });
+
+            if (aliveCount > 0) {
+                animationFrameId = requestAnimationFrame(renderCanvas);
+            } else {
+                stopCelebrationCanvas();
+            }
+        }
+
+        function stopCelebrationCanvas() {
+            isCanvasAnimating = false;
+            if (animationFrameId) cancelAnimationFrame(animationFrameId);
+            const canvas = document.getElementById('celebrationCanvas');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        window.addEventListener('resize', () => {
+            const canvasCelebration = document.getElementById('celebrationCanvas');
+            if (canvasCelebration) {
+                canvasCelebration.width = window.innerWidth;
+                canvasCelebration.height = window.innerHeight;
+            }
+        });
+
+        window.onload = function() {
+            canvas = document.getElementById('wheelCanvas');
+            if (canvas) {
+                ctx = canvas.getContext('2d');
+                drawWheel();
+            }
+        };
+    </script>
+</body>
+</html>
