@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>台灣經典好食物 - 懷舊拉霸機</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts for Retro Style -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700;900&family=Yuji+Mai&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      font-family: 'Noto Serif TC', serif;
+      background-color: #f4ece1;
+      background-image: radial-gradient(#d3c3b0 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+    }
+    
+    /* 懷舊邊框與陰影 */
+    .retro-border {
+      border: 4px solid #8c5a2b;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 0 8px 20px rgba(74, 44, 20, 0.25);
+    }
+
+    .wood-texture {
+      background: linear-gradient(135deg, #7a4a21 0%, #5c3515 50%, #42230c 100%);
+      border: 3px solid #b8860b;
+    }
+
+    /* 燈泡閃爍效果 */
+    @keyframes bulbFlashing {
+      0%, 100% { opacity: 1; filter: drop-shadow(0 0 6px #ffb703); }
+      50% { opacity: 0.4; filter: drop-shadow(0 0 1px #ffb703); }
+    }
+    .bulb-light {
+      animation: bulbFlashing 1.2s infinite alternate;
+    }
+    .bulb-light:nth-child(even) {
+      animation-delay: 0.6s;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between text-[#4a2c14] select-none overflow-x-hidden">
+
+  <!-- 頂部導覽列 -->
+  <header class="w-full bg-[#5c3515] text-[#fbf8f3] border-b-4 border-[#b8860b] px-6 py-3 flex justify-between items-center shadow-lg z-10">
+    <div class="flex items-center space-x-3">
+      <span class="text-xl font-black tracking-widest text-[#f3d5a3]">TW</span>
+      <h1 class="text-2xl font-black tracking-wider text-[#fff4e0] drop-shadow-md">台灣經典好食物</h1>
+    </div>
+    <div class="flex items-center space-x-3">
+      <button id="btnMute" class="p-2 rounded-lg bg-[#7a4a21] border border-[#d4af37] text-[#fbf8f3] hover:bg-[#8c5a2b] transition">
+        🔊 音效
+      </button>
+    </div>
+  </header>
+
+  <!-- 主要內容區塊 -->
+  <main class="flex-1 flex flex-col items-center justify-center p-4 relative">
+
+    <!-- 主拉霸機容器 -->
+    <div id="slotMachineContainer" class="wood-texture rounded-3xl p-6 sm:p-8 max-w-2xl w-full relative retro-border cursor-pointer transition-transform duration-150 active:scale-[0.99]">
+      
+      <!-- 上方古早味燈光招牌 -->
+      <div class="bg-[#3a1e08] border-2 border-[#d4af37] rounded-xl p-4 mb-6 text-center relative overflow-hidden shadow-inner flex items-center justify-center min-h-[90px]">
+        <!-- 復古裝飾燈泡 -->
+        <div class="flex justify-between px-4 absolute top-1.5 left-0 right-0">
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+        </div>
+        
+        <h2 class="text-3xl sm:text-4xl font-black text-[#ffe8b6] tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] my-auto py-1">
+          台灣經典好食物
+        </h2>
+
+        <div class="flex justify-between px-4 absolute bottom-1.5 left-0 right-0">
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+          <span class="w-3 h-3 rounded-full bg-[#ffb703] bulb-light"></span>
+        </div>
+      </div>
+
+      <!-- 拉霸機滾輪展示窗 -->
+      <div class="relative bg-[#faf6ee] border-4 border-[#8c5a2b] rounded-2xl h-48 sm:h-56 flex items-center justify-center overflow-hidden shadow-[inset_0_4px_12px_rgba(0,0,0,0.4)]">
+        <!-- 上下陰影壓感 -->
+        <div class="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-black/30 to-transparent z-10 pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-black/30 to-transparent z-10 pointer-events-none"></div>
+        
+        <!-- 兩側箭頭裝飾 -->
+        <span class="absolute left-3 text-[#b8860b] text-2xl font-bold z-10 hidden sm:block">▶</span>
+        <span class="absolute right-3 text-[#b8860b] text-2xl font-bold z-10 hidden sm:block">◀</span>
+
+        <!-- 文字動態顯示區 -->
+        <div id="slotDisplayText" class="px-6 text-center font-black text-[#3a1e08] tracking-tight leading-snug transition-all duration-75 flex items-center justify-center h-full w-full text-2xl sm:text-4xl">
+          點擊開始拉霸
+        </div>
+      </div>
+
+      <!-- 右側復古拉桿 -->
+      <div id="lever" class="absolute -right-6 top-1/2 transform -translate-y-1/2 flex flex-col items-center cursor-pointer group">
+        <div class="w-4 h-24 bg-gradient-to-r from-[#d4af37] via-[#fff4e0] to-[#8c5a2b] rounded-full shadow-md transition-transform duration-200 origin-bottom" id="leverArm"></div>
+        <div class="w-10 h-10 bg-gradient-to-br from-[#e63946] to-[#9e2a2b] rounded-full border-2 border-[#fff4e0] shadow-lg -mt-3 group-hover:scale-110 transition-transform" id="leverBall"></div>
+      </div>
+
+      <p class="text-center text-[#ffe8b6] text-sm mt-4 font-bold tracking-wider opacity-90">
+        💡 提示：點擊機身或拉桿啟動，停下後再點一下顯示對應照片
+      </p>
+    </div>
+
+  </main>
+
+  <!-- 頁腳 -->
+  <footer class="w-full text-center py-3 text-xs text-[#7a4a21] border-t border-[#d3c3b0]">
+    台灣經典好食物 © 懷舊風俗諺體驗
+  </footer>
+
+  <!-- 對應照片彈窗 Modal -->
+  <div id="imageModal" class="fixed inset-0 bg-black/75 flex items-center justify-center z-50 hidden opacity-0 transition-opacity duration-300 p-4">
+    <div class="bg-[#fbf8f3] border-4 border-[#b8860b] rounded-2xl p-4 sm:p-6 max-w-lg w-full relative shadow-2xl transform scale-95 transition-transform duration-300" id="modalCard">
+      <!-- 關閉按鈕 -->
+      <button id="btnCloseModal" class="absolute -top-4 -right-4 bg-[#8c5a2b] text-[#fbf8f3] border-2 border-[#d4af37] rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl hover:bg-[#5c3515] shadow-lg">
+        ✕
+      </button>
+
+      <h3 id="modalTitle" class="text-xl sm:text-2xl font-black text-[#4a2c14] text-center mb-4 border-b-2 border-[#d3c3b0] pb-2">
+        題目名稱
+      </h3>
+
+      <div class="rounded-xl overflow-hidden border-2 border-[#8c5a2b] bg-[#eee5d8] flex items-center justify-center min-h-[240px]">
+        <img id="modalImage" src="" alt="對應照片" class="max-h-[60vh] w-auto object-contain rounded-lg" />
+      </div>
+
+      <p class="text-center text-sm text-[#7a4a21] mt-3 font-bold">
+        （點擊任意處關閉並進行下一輪）
+      </p>
+    </div>
+  </div>
+
+  <!-- 紙花畫布 Canvas（提升層級至 z-[100]） -->
+  <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-[100]"></canvas>
+
+  <script>
+    // 5 個俗諺與對應照片
+    const proverbsData = [
+      { text: "Ài ū kám-un ê sim", image: "25.jpg" },
+      { text: "Hêng-iông tăⁿ chai-iáⁿ hiáng-siū", image: "24.jpg" },
+      { text: "Chia̍h-pn̄g siōng tiōng-iàu", image: "21.jpg" },
+      { text: "Bē-sái kéng-chia̍h", image: "22.jpg" },
+      { text: "chia̍h-tio̍h hó-chia̍h--ê, ài kâng pò", image: "23.jpg" }
+    ];
+
+    // 不重複洗牌池
+    let proverbPool = [];
+
+    // 狀態變數
+    let currentState = "IDLE";
+    let currentResult = null;
+    let audioCtx = null;
+    let isMuted = false;
+
+    // DOM 元素
+    const slotContainer = document.getElementById("slotMachineContainer");
+    const slotDisplayText = document.getElementById("slotDisplayText");
+    const leverArm = document.getElementById("leverArm");
+    const leverBall = document.getElementById("leverBall");
+    const imageModal = document.getElementById("imageModal");
+    const modalCard = document.getElementById("modalCard");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalImage = document.getElementById("modalImage");
+    const btnCloseModal = document.getElementById("btnCloseModal");
+    const btnMute = document.getElementById("btnMute");
+
+    const myConfetti = confetti.create(document.getElementById('confettiCanvas'), {
+      resize: true,
+      useWorker: true
+    });
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playLeverSound() {
+      if (isMuted || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.12);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.12);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.12);
+    }
+
+    function playClickSound() {
+      if (isMuted || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(400 + Math.random() * 200, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.03);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.03);
+    }
+
+    function playStopSound() {
+      if (isMuted || !audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(120, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(30, audioCtx.currentTime + 0.18);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.18);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.18);
+    }
+
+    function playCelebrationSound() {
+      if (isMuted || !audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.1, audioCtx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < noiseBuffer.length; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      const whiteNoise = audioCtx.createBufferSource();
+      whiteNoise.buffer = noiseBuffer;
+
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = 'lowpass';
+      noiseFilter.frequency.setValueAtTime(800, now);
+      noiseFilter.frequency.linearRampToValueAtTime(50, now + 0.1);
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0.6, now);
+      noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+      whiteNoise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+      whiteNoise.start(now);
+
+      const notes = [523.25, 659.25, 783.99, 1046.50];
+      notes.forEach((freq, idx) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(freq, now + 0.05 + idx * 0.06);
+
+        gain.gain.setValueAtTime(0, now + 0.05 + idx * 0.06);
+        gain.gain.linearRampToValueAtTime(0.2, now + 0.08 + idx * 0.06);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8 + idx * 0.06);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        osc.start(now + 0.05 + idx * 0.06);
+        osc.stop(now + 0.8 + idx * 0.06);
+      });
+    }
+
+    function getNextProverb() {
+      if (proverbPool.length === 0) {
+        proverbPool = [...proverbsData];
+        for (let i = proverbPool.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [proverbPool[i], proverbPool[j]] = [proverbPool[j], proverbPool[i]];
+        }
+      }
+      return proverbPool.pop();
+    }
+
+    function updateTextWithDynamicFont(text) {
+      slotDisplayText.innerText = text;
+      const len = text.length;
+
+      if (len <= 15) {
+        slotDisplayText.className = "px-4 text-center font-black text-[#3a1e08] text-2xl sm:text-4xl md:text-5xl tracking-tight leading-snug flex items-center justify-center h-full w-full";
+      } else if (len <= 25) {
+        slotDisplayText.className = "px-4 text-center font-black text-[#3a1e08] text-xl sm:text-2xl md:text-3xl tracking-tight leading-snug flex items-center justify-center h-full w-full";
+      } else {
+        slotDisplayText.className = "px-3 text-center font-black text-[#3a1e08] text-lg sm:text-xl md:text-2xl tracking-tight leading-snug flex items-center justify-center h-full w-full";
+      }
+    }
+
+    function startSpin() {
+      if (currentState === "SPINNING") return;
+      initAudio();
+
+      currentState = "SPINNING";
+      playLeverSound();
+
+      leverArm.style.transform = "rotateX(45deg) scaleY(0.6)";
+      leverBall.style.transform = "translateY(20px)";
+      setTimeout(() => {
+        leverArm.style.transform = "rotateX(0deg) scaleY(1)";
+        leverBall.style.transform = "translateY(0px)";
+      }, 250);
+
+      currentResult = getNextProverb();
+
+      let speed = 22;
+      let totalSteps = 65;
+      let currentStep = 0;
+
+      function step() {
+        currentStep++;
+        const randomTempIndex = Math.floor(Math.random() * proverbsData.length);
+        updateTextWithDynamicFont(proverbsData[randomTempIndex].text);
+        playClickSound();
+
+        if (currentStep < totalSteps) {
+          if (currentStep > totalSteps - 15) {
+            speed += 18;
+          }
+          setTimeout(step, speed);
+        } else {
+          updateTextWithDynamicFont(currentResult.text);
+          playStopSound();
+          currentState = "STOPPED";
+        }
+      }
+
+      step();
+    }
+
+    function showModal() {
+      if (!currentResult) return;
+
+      currentState = "MODAL";
+      modalTitle.innerText = currentResult.text;
+      modalImage.src = currentResult.image;
+
+      imageModal.classList.remove("hidden");
+      setTimeout(() => {
+        imageModal.classList.remove("opacity-0");
+        modalCard.classList.remove("scale-95");
+        modalCard.classList.add("scale-100");
+      }, 10);
+
+      myConfetti({
+        particleCount: 90,
+        spread: 80,
+        origin: { y: 0.6 },
+        zIndex: 100
+      });
+
+      playCelebrationSound();
+    }
+
+    function closeModal() {
+      imageModal.classList.add("opacity-0");
+      modalCard.classList.remove("scale-100");
+      modalCard.classList.add("scale-95");
+      setTimeout(() => {
+        imageModal.classList.add("hidden");
+        currentState = "IDLE";
+      }, 300);
+    }
+
+    slotContainer.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (currentState === "IDLE") {
+        startSpin();
+      } else if (currentState === "STOPPED") {
+        showModal();
+      }
+    });
+
+    imageModal.addEventListener("click", () => {
+      if (currentState === "MODAL") {
+        closeModal();
+      }
+    });
+    btnCloseModal.addEventListener("click", (e) => {
+      e.stopPropagation();
+      if (currentState === "MODAL") {
+        closeModal();
+      }
+    });
+
+    btnMute.addEventListener("click", (e) => {
+      e.stopPropagation();
+      isMuted = !isMuted;
+      btnMute.innerText = isMuted ? "🔇 靜音" : "🔊 音效";
+    });
+  </script>
+</body>
+</html>
