@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tōng-bu̍t phiⁿ - Tâi-oân Slot Machine</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&family=Outfit:wght@500;700;900&display=swap" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: #f4ece1;
+        }
+
+        body {
+            font-family: 'Iansui', 'Outfit', sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            color: #3a1e08;
+        }
+
+        .font-iansui {
+            font-family: 'Iansui', serif;
+        }
+
+        /* Warm Coffee & Metallic Brass Palette */
+        .bg-coffee-pattern {
+            background-color: #f4ece1;
+            background-image: 
+                radial-gradient(#d5c3b0 1.5px, transparent 1.5px),
+                linear-gradient(to bottom, rgba(244, 236, 225, 0.8), rgba(230, 215, 200, 0.9));
+            background-size: 20px 20px, 100% 100%;
+        }
+
+        .slot-machine-body {
+            background: linear-gradient(145deg, #4a2810, #2c1404);
+            box-shadow: 0 20px 40px rgba(58, 30, 8, 0.5), 0 0 0 4px #8b5a2b, inset 0 3px 6px rgba(255, 255, 255, 0.2);
+            border: 3px solid #d4af37;
+        }
+
+        /* Marquee Bulbs */
+        .bulb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: #5c3515;
+            transition: background-color 0.15s, box-shadow 0.15s;
+        }
+        @media (min-width: 640px) {
+            .bulb {
+                width: 12px;
+                height: 12px;
+            }
+        }
+        .bulb.active-1 {
+            background-color: #f59e0b;
+            box-shadow: 0 0 10px #f59e0b, 0 0 20px #f59e0b;
+        }
+        .bulb.active-2 {
+            background-color: #ef4444;
+            box-shadow: 0 0 10px #ef4444, 0 0 20px #ef4444;
+        }
+        .bulb.active-3 {
+            background-color: #10b981;
+            box-shadow: 0 0 10px #10b981, 0 0 20px #10b981;
+        }
+
+        /* Slot Window */
+        .reel-window {
+            background: linear-gradient(to bottom, #231205 0%, #4a2810 50%, #231205 100%);
+            box-shadow: inset 0 12px 24px rgba(0,0,0,0.85), 0 0 15px rgba(212, 175, 55, 0.4);
+            border: 3px solid #d4af37;
+        }
+
+        .glass-overlay {
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.03) 40%, rgba(0,0,0,0) 41%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+        }
+
+        /* Physical Lever Animation */
+        .lever-arm {
+            transform-origin: bottom center;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .lever-pulled .lever-arm {
+            transform: rotateX(65deg) scaleY(0.7);
+        }
+        .lever-ball {
+            box-shadow: inset -3px -3px 8px rgba(0,0,0,0.6), 0 0 12px rgba(239, 68, 68, 0.8);
+            transition: transform 0.15s;
+        }
+        .lever-pulled .lever-ball {
+            transform: translateY(80px) scale(0.9);
+        }
+
+        /* Text dynamic scaling helper */
+        .fit-text {
+            font-size: clamp(2rem, 8vw, 4rem);
+            white-space: nowrap;
+        }
+    </style>
+</head>
+<body class="bg-coffee-pattern h-screen h-[100dvh] flex flex-col justify-between overflow-hidden relative">
+
+    <canvas id="confettiCanvas" class="fixed inset-0 pointer-events-none z-[100]"></canvas>
+
+    <!-- Header Navigation -->
+    <header class="w-full bg-[#3a1e08] text-[#f4ece1] border-b-2 border-[#d4af37] pt-3 pb-2 px-3 md:px-6 flex justify-between items-center z-20 flex-shrink-0 shadow-md">
+        <div class="flex items-center gap-2">
+            <h1 class="text-xl md:text-3xl font-black tracking-wide text-[#d4af37] font-iansui drop-shadow-sm">
+                Tōng-bu̍t phiⁿ
+            </h1>
+        </div>
+        
+        <!-- Controls -->
+        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <button id="bgmToggleBtn" class="px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg bg-[#5c3515] hover:bg-[#7a481d] text-[#f4ece1] border border-[#d4af37]/60 text-xs md:text-sm font-iansui transition flex items-center gap-1.5 shadow-sm">
+                <i class="fas fa-music text-amber-400" id="bgmIcon"></i>
+                <span id="bgmText">音樂: 開</span>
+            </button>
+            <button id="soundToggleBtn" class="p-1.5 md:p-2 rounded-lg bg-[#5c3515] hover:bg-[#7a481d] text-[#f4ece1] border border-[#d4af37]/60 transition" title="音效切換">
+                <i class="fas fa-volume-up text-amber-400" id="soundIcon"></i>
+            </button>
+            <button id="resetPoolBtn" class="px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg bg-[#8b5a2b] hover:bg-[#a66d35] text-white border border-[#d4af37]/60 text-xs md:text-sm font-iansui transition flex items-center gap-1 shadow-sm">
+                <i class="fas fa-rotate-right text-amber-300"></i>
+                <span>重置</span>
+            </button>
+        </div>
+    </header>
+
+    <main id="clickAnywhereArea" class="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 relative cursor-pointer select-none min-h-0">
+        
+        <!-- Cycle Progress Counter -->
+        <div class="mb-3 px-4 py-1.5 bg-[#3a1e08]/90 border border-[#d4af37]/60 rounded-full flex items-center gap-3 shadow-lg backdrop-blur z-20 text-[#f4ece1]">
+            <div class="text-xs md:text-sm font-iansui">
+                輪盤進度：<span id="remainingCount" class="text-amber-400 font-bold text-base md:text-lg">7 / 7</span>
+            </div>
+            <div class="w-24 bg-[#2c1404] h-2.5 rounded-full overflow-hidden border border-[#8b5a2b]">
+                <div id="progressBar" class="bg-amber-400 h-full w-full transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Slot Machine Wrapper -->
+        <div class="relative flex items-center justify-center w-[calc(100%-1rem)] max-w-xl my-auto">
+            
+            <!-- Machine Body -->
+            <div class="slot-machine-body w-full rounded-3xl p-3 sm:p-5 md:p-6 relative z-10 flex flex-col items-center shadow-2xl">
+                
+                <!-- Title Sign with Bulbs -->
+                <div class="w-full bg-[#1f0d02] rounded-2xl p-2.5 md:p-3 mb-3 border-2 border-[#d4af37]/70 flex flex-col items-center relative overflow-hidden shadow-inner">
+                    <!-- Top Bulbs -->
+                    <div class="w-full flex justify-between px-2 mb-1" id="topBulbs">
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div>
+                    </div>
+
+                    <!-- Marquee Title -->
+                    <div class="text-center py-1">
+                        <div class="text-[10px] md:text-xs tracking-widest text-amber-400 font-bold font-sans">TAIWANESE ANIMAL SLOT</div>
+                        <div class="text-3xl sm:text-4xl md:text-5xl font-black text-[#f4ece1] font-iansui tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                            Tōng-bu̍t phiⁿ
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bulbs -->
+                    <div class="w-full flex justify-between px-2 mt-1" id="bottomBulbs">
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div>
+                    </div>
+                </div>
+
+                <!-- Reel Frame Window -->
+                <div class="w-full relative my-1">
+                    <div id="reelWindow" class="reel-window rounded-2xl h-36 sm:h-44 md:h-52 w-full overflow-hidden relative cursor-pointer group">
+                        
+                        <!-- Reel Arrow Pointers -->
+                        <div class="absolute inset-x-0 h-full border-y-2 border-amber-400/80 bg-amber-400/5 z-20 pointer-events-none flex justify-between items-center px-2">
+                            <div class="text-amber-400 text-lg sm:text-2xl md:text-3xl"><i class="fas fa-caret-right"></i></div>
+                            <div class="text-amber-400 text-lg sm:text-2xl md:text-3xl"><i class="fas fa-caret-left"></i></div>
+                        </div>
+
+                        <!-- Click Hint Badge -->
+                        <div id="clickImageBadge" class="absolute bottom-3 left-1/2 transform -translate-x-1/2 z-30 bg-amber-400 text-[#2c1404] font-iansui font-black text-xs sm:text-sm px-4 py-1.5 rounded-full shadow-xl border-2 border-amber-200 opacity-0 transition-all duration-300 pointer-events-none flex items-center gap-1.5">
+                            <i class="fas fa-hand-pointer"></i> 點擊查看圖片
+                        </div>
+
+                        <!-- Glass Reflection -->
+                        <div class="glass-overlay absolute inset-0 z-25"></div>
+
+                        <!-- Animated Reel Strip -->
+                        <div id="reelContainer" class="w-full absolute top-0 left-0 flex flex-col items-center">
+                            <!-- Injected by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prompt Footer -->
+                <div id="statusInstruction" class="mt-3 text-center text-xs sm:text-sm font-iansui text-[#e6d7c3] flex items-center gap-1.5">
+                    <i class="fas fa-circle-info text-amber-400"></i>
+                    <span>點擊畫面或拉桿開始轉動 (全 7 款不重複)</span>
+                </div>
+
+            </div>
+
+            <!-- Vintage Brass Lever -->
+            <div id="leverAssembly" class="relative z-0 hidden sm:block -ml-3 h-48 w-10 cursor-pointer" title="點擊拉桿">
+                <div class="absolute bottom-3 left-0 w-6 h-12 bg-gradient-to-r from-[#5c3515] to-[#2c1404] rounded-r-lg border-y border-r border-[#8b5a2b] shadow-xl"></div>
+                <div class="absolute bottom-6 left-1.5 w-5 h-6 bg-[#d4af37] rounded-r-full shadow-inner border border-amber-200"></div>
+
+                <div id="leverArm" class="lever-arm absolute bottom-8 left-2.5 w-2.5 h-32 bg-gradient-to-r from-amber-200 via-amber-400 to-amber-600 rounded-t-full shadow-md origin-bottom">
+                    <div id="leverBall" class="lever-ball absolute -top-5 -left-2.5 w-7 h-7 bg-gradient-to-tr from-red-700 via-red-500 to-rose-300 rounded-full border border-red-400"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Image View Modal (Displays exact image files 圖片1.png ~ 圖片7.png) -->
+    <div id="imageModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[110] flex items-center justify-center p-3 sm:p-5 hidden" onclick="event.stopPropagation()">
+        <div class="bg-[#2c1404] border-2 border-[#d4af37] rounded-3xl max-w-lg w-full p-4 sm:p-6 flex flex-col items-center shadow-2xl relative overflow-hidden text-center transform transition-all duration-300 scale-95 opacity-0" id="imageModalBox">
+            
+            <!-- Close Button -->
+            <button class="modal-close absolute top-3 right-3 text-[#e6d7c3] hover:text-white bg-[#5c3515] hover:bg-[#7a481d] rounded-full w-9 h-9 flex items-center justify-center text-lg transition z-10 border border-[#d4af37]/50">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Image Tag Indicator -->
+            <div id="modalImageTag" class="px-4 py-1 bg-[#8b5a2b] text-amber-300 border border-[#d4af37] rounded-full text-sm font-bold font-iansui mb-3 shadow-md">
+                圖片1.png
+            </div>
+
+            <!-- Display Image Container -->
+            <div class="w-full bg-[#1f0d02] rounded-2xl border border-[#8b5a2b] p-2 mb-4 overflow-hidden shadow-inner flex items-center justify-center max-h-[60vh]">
+                <img id="modalImage" src="" alt="Animal Image" class="w-full h-auto max-h-[55vh] object-contain rounded-xl">
+            </div>
+
+            <!-- Action Button -->
+            <button class="modal-close px-8 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-[#2c1404] font-iansui font-black rounded-xl transition border border-amber-200 shadow-lg text-lg">
+                關閉
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 7 Taiwanese Animal Items mapping to image files
+        const ANIMAL_ITEMS = [
+            { id: 1, pinyin: "hô-bé", imageFile: "圖片1.png" },
+            { id: 2, pinyin: "kî-lîn-lo̍k", imageFile: "圖片2.png" },
+            { id: 3, pinyin: "hoe-tiâu-bé", imageFile: "圖片3.png" },
+            { id: 4, pinyin: "sai-gû", imageFile: "圖片4.png" },
+            { id: 5, pinyin: "chhiūⁿ", imageFile: "圖片5.png" },
+            { id: 6, pinyin: "kâu", imageFile: "圖片6.png" },
+            { id: 7, pinyin: "kho̍k-hî", imageFile: "圖片7.png" }
+        ];
+
+        /* Upbeat, High-Energy Fast Arcade Synthesizer BGM */
+        class ExcitingArcadeBgm {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.enabled = true;
+                this.timer = null;
+                this.step = 0;
+
+                // High Tempo BPM (~160 BPM) -> ~93ms per 16th note
+                this.stepInterval = 93;
+
+                // Musical Note Frequencies
+                this.notes = {
+                    'C3': 130.81, 'E3': 164.81, 'G3': 196.00, 'A3': 220.00,
+                    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'G4': 392.00, 'A4': 440.00,
+                    'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'G5': 783.99, 'A5': 880.00
+                };
+
+                // Fast Arpeggiated Arcade Lead Pattern
+                this.leadPattern = [
+                    'C5', 'E5', 'G5', 'C5', 'E5', 'G5', 'A5', 'G5',
+                    'A4', 'C5', 'E5', 'A4', 'C5', 'E5', 'G5', 'E5',
+                    'F4', 'A4', 'C5', 'F4', 'A4', 'C5', 'D5', 'C5',
+                    'G4', 'B4', 'D5', 'G4', 'B4', 'D5', 'F5', 'E5'
+                ];
+
+                // Energetic Driving Bassline Pattern
+                this.bassPattern = [
+                    'C3', 'C3', 'G3', 'C3', 'C3', 'C3', 'G3', 'C3',
+                    'A3', 'A3', 'E3', 'A3', 'A3', 'A3', 'E3', 'A3',
+                    'F3', 'F3', 'C3', 'F3', 'F3', 'F3', 'C3', 'F3',
+                    'G3', 'G3', 'D3', 'G3', 'G3', 'G3', 'D3', 'G3'
+                ];
+            }
+
+            init(audioCtx) {
+                if (audioCtx) this.ctx = audioCtx;
+            }
+
+            start() {
+                if (this.isPlaying || !this.enabled || !this.ctx) return;
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                this.isPlaying = true;
+                this.step = 0;
+                
+                this.timer = setInterval(() => {
+                    if (!this.isPlaying || !this.enabled) return;
+                    this.playArcadeStep();
+                    this.step = (this.step + 1) % this.leadPattern.length;
+                }, this.stepInterval);
+            }
+
+            stop() {
+                this.isPlaying = false;
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                if (this.enabled) {
+                    if (this.ctx) this.start();
+                } else {
+                    this.stop();
+                }
+                return this.enabled;
+            }
+
+            playArcadeStep() {
+                if (!this.ctx || this.ctx.state !== 'running') return;
+                const now = this.ctx.currentTime;
+
+                // 1. Play Lead Arpeggio Synth
+                const leadNote = this.leadPattern[this.step];
+                if (this.notes[leadNote]) {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'square'; // Arcade Chiptune vibe
+                    osc.frequency.setValueAtTime(this.notes[leadNote], now);
+
+                    gain.gain.setValueAtTime(0.04, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.085);
+                }
+
+                // 2. Play Punchy Bassline Synth
+                const bassNote = this.bassPattern[this.step];
+                if (this.notes[bassNote]) {
+                    const bassOsc = this.ctx.createOscillator();
+                    const bassGain = this.ctx.createGain();
+
+                    bassOsc.type = 'sawtooth';
+                    bassOsc.frequency.setValueAtTime(this.notes[bassNote] || 130, now);
+
+                    bassGain.gain.setValueAtTime(0.06, now);
+                    bassGain.gain.exponentialRampToValueAtTime(0.001, now + 0.09);
+
+                    bassOsc.connect(bassGain);
+                    bassGain.connect(this.ctx.destination);
+
+                    bassOsc.start(now);
+                    bassOsc.stop(now + 0.095);
+                }
+
+                // 3. Arcade Percussive Hi-Hat on off-beats
+                if (this.step % 2 === 1) {
+                    const noise = this.ctx.createBufferSource();
+                    const buffer = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.02, this.ctx.sampleRate);
+                    const data = buffer.getChannelData(0);
+                    for (let i = 0; i < buffer.length; i++) {
+                        data[i] = Math.random() * 2 - 1;
+                    }
+                    noise.buffer = buffer;
+
+                    const filter = this.ctx.createBiquadFilter();
+                    filter.type = 'highpass';
+                    filter.frequency.value = 5000;
+
+                    const noiseGain = this.ctx.createGain();
+                    noiseGain.gain.setValueAtTime(0.015, now);
+                    noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 0.02);
+
+                    noise.connect(filter);
+                    filter.connect(noiseGain);
+                    noiseGain.connect(this.ctx.destination);
+
+                    noise.start(now);
+                }
+            }
+        }
+
+        /* Sound Effects Engine */
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.enabled = true;
+                this.bgm = new ExcitingArcadeBgm();
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                        this.bgm.init(this.ctx);
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                if (this.bgm.enabled && !this.bgm.isPlaying) {
+                    this.bgm.start();
+                }
+            }
+
+            playLeverSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(60, this.ctx.currentTime + 0.2);
+
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.2);
+            }
+
+            playTickSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600 + Math.random() * 200, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.03);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.03);
+            }
+
+            playWinSound() {
+                if (!this.enabled) return;
+                this.init();
+                if (!this.ctx) return;
+
+                // Exciting Arcade Victory Fanfare
+                const arpeggio = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+                arpeggio.forEach((freq, idx) => {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, this.ctx.currentTime + idx * 0.07);
+
+                    gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.07);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + idx * 0.07 + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(this.ctx.currentTime + idx * 0.07);
+                    osc.stop(this.ctx.currentTime + idx * 0.07 + 0.25);
+                });
+            }
+        }
+
+        const sounds = new SoundEngine();
+
+        // Game Logic State
+        let availablePool = [...ANIMAL_ITEMS];
+        let lastDrawnItem = null;
+        let isSpinning = false;
+        let bulbPhase = 0;
+
+        // DOM Handles
+        const reelContainer = document.getElementById('reelContainer');
+        const reelWindow = document.getElementById('reelWindow');
+        const leverArm = document.getElementById('leverArm');
+        const leverAssembly = document.getElementById('leverAssembly');
+        const clickImageBadge = document.getElementById('clickImageBadge');
+        const imageModal = document.getElementById('imageModal');
+        const imageModalBox = document.getElementById('imageModalBox');
+        const modalImage = document.getElementById('modalImage');
+        const modalImageTag = document.getElementById('modalImageTag');
+        const remainingCountEl = document.getElementById('remainingCount');
+        const progressBarEl = document.getElementById('progressBar');
+        const statusInstructionEl = document.getElementById('statusInstruction');
+
+        function getItemHeight() {
+            return reelWindow ? reelWindow.clientHeight : 160;
+        }
+
+        // Build continuous reel strip (12 full cycles = 84 items for long animated spin)
+        function buildReelDOM(targetItem = null) {
+            reelContainer.innerHTML = '';
+            const itemHeight = getItemHeight();
+            
+            const totalCycles = 14; 
+            const extendedList = [];
+            for (let i = 0; i < totalCycles; i++) {
+                extendedList.push(...ANIMAL_ITEMS);
+            }
+
+            extendedList.forEach((item) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'w-full flex items-center justify-center px-4 text-center flex-shrink-0';
+                itemEl.style.height = `${itemHeight}px`;
+                
+                itemEl.innerHTML = `
+                    <div class="fit-text font-black text-amber-300 font-iansui leading-tight tracking-wide drop-shadow-[0_4px_8px_rgba(0,0,0,0.9)]">
+                        ${item.pinyin}
+                    </div>
+                `;
+                reelContainer.appendChild(itemEl);
+            });
+            
+            if (targetItem) {
+                const targetIndex = ANIMAL_ITEMS.findIndex(a => a.id === targetItem.id);
+                setReelPosition(targetIndex, false);
+            } else {
+                setReelPosition(0, false);
+            }
+        }
+
+        function setReelPosition(index, animate = false) {
+            const itemHeight = getItemHeight();
+            const targetY = -(index * itemHeight);
+            
+            if (!animate) {
+                reelContainer.style.transition = 'none';
+            }
+            reelContainer.style.transform = `translateY(${targetY}px)`;
+        }
+
+        // Animated Marquee Bulbs
+        function initBulbs() {
+            const topBulbs = document.querySelectorAll('#topBulbs .bulb');
+            const bottomBulbs = document.querySelectorAll('#bottomBulbs .bulb');
+            const allBulbs = [...topBulbs, ...bottomBulbs];
+
+            setInterval(() => {
+                bulbPhase = (bulbPhase + 1) % 3;
+                allBulbs.forEach((bulb, idx) => {
+                    bulb.classList.remove('active-1', 'active-2', 'active-3');
+                    if ((idx + bulbPhase) % 3 === 0) {
+                        bulb.classList.add('active-1');
+                    } else if ((idx + bulbPhase) % 3 === 1) {
+                        bulb.classList.add('active-2');
+                    } else {
+                        bulb.classList.add('active-3');
+                    }
+                });
+            }, 200);
+        }
+
+        // Fisher-Yates Non-repeating Spin Mechanism
+        function startSpin() {
+            if (isSpinning) return;
+
+            // Auto-reset when pool is exhausted
+            if (availablePool.length === 0) {
+                resetPool();
+            }
+
+            isSpinning = true;
+            clickImageBadge.classList.add('opacity-0');
+
+            sounds.init();
+            sounds.playLeverSound();
+
+            // Pull lever visual animation
+            leverAssembly.classList.add('lever-pulled');
+            setTimeout(() => leverAssembly.classList.remove('lever-pulled'), 300);
+
+            // Fisher-Yates draw
+            const randomIndex = Math.floor(Math.random() * availablePool.length);
+            const selectedItem = availablePool[randomIndex];
+            availablePool.splice(randomIndex, 1);
+            lastDrawnItem = selectedItem;
+
+            updateProgressUI();
+
+            // Target 12 full rotations down
+            const itemIndex = ANIMAL_ITEMS.findIndex(a => a.id === selectedItem.id);
+            const rotationOffset = 12 * ANIMAL_ITEMS.length; 
+            const targetDOMIndex = rotationOffset + itemIndex;
+
+            // Audio ticking simulation that gradually slows down
+            const totalDuration = 3200; // ms
+            const startTime = performance.now();
+
+            function animateReel(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / totalDuration, 1);
+
+                // Smooth cubic ease-out stopping curve
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const currentIndex = easeOut * targetDOMIndex;
+
+                setReelPosition(currentIndex, false);
+
+                // Sound ticks at boundary crossings
+                if (Math.floor(currentIndex) > (animateReel.lastIndex || 0)) {
+                    sounds.playTickSound();
+                    animateReel.lastIndex = Math.floor(currentIndex);
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateReel);
+                } else {
+                    // Spin finished
+                    setReelPosition(targetDOMIndex, false);
+                    sounds.playWinSound();
+                    triggerConfetti();
+
+                    clickImageBadge.classList.remove('opacity-0');
+                    
+                    if (availablePool.length === 0) {
+                        statusInstructionEl.innerHTML = `<span class="text-amber-300 font-bold"><i class="fas fa-check-circle"></i> 7 款已全部出現！點擊查看圖片，或再次點擊重新開始。</span>`;
+                    } else {
+                        statusInstructionEl.innerHTML = `<span class="text-amber-300 font-bold"><i class="fas fa-hand-pointer"></i> 點擊中央成果查看圖片【${selectedItem.imageFile}】</span>`;
+                    }
+
+                    isSpinning = false;
+                }
+            }
+
+            requestAnimationFrame(animateReel);
+        }
+
+        function updateProgressUI() {
+            const total = ANIMAL_ITEMS.length;
+            const remaining = availablePool.length;
+            remainingCountEl.textContent = `${remaining} / ${total}`;
+            const percentage = (remaining / total) * 100;
+            progressBarEl.style.width = `${percentage}%`;
+        }
+
+        function resetPool() {
+            availablePool = [...ANIMAL_ITEMS];
+            lastDrawnItem = null;
+            updateProgressUI();
+            clickImageBadge.classList.add('opacity-0');
+            statusInstructionEl.innerHTML = `<i class="fas fa-circle-info text-amber-400"></i><span>點擊畫面或拉桿開始轉動 (全 7 款不重複)</span>`;
+            buildReelDOM();
+        }
+
+        // Open Image Modal containing ONLY image file
+        function openImageModalForItem(item) {
+            if (!item) return;
+
+            modalImageTag.textContent = `檔案名稱：${item.imageFile}`;
+            modalImage.src = item.imageFile;
+
+            imageModal.classList.remove('hidden');
+            setTimeout(() => {
+                imageModalBox.classList.remove('scale-95', 'opacity-0');
+                imageModalBox.classList.add('scale-100', 'opacity-100');
+            }, 20);
+        }
+
+        function closeImageModal() {
+            imageModalBox.classList.remove('scale-100', 'opacity-100');
+            imageModalBox.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                imageModal.classList.add('hidden');
+            }, 200);
+        }
+
+        // Canvas Victory Confetti Burst (z-[100])
+        const canvas = document.getElementById('confettiCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function triggerConfetti() {
+            particles = [];
+            const colors = ['#f59e0b', '#ef4444', '#10b981', '#3b82f6', '#ec4899', '#d4af37'];
+            
+            for (let i = 0; i < 70; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2 - 20,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.7) * 14,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    size: Math.random() * 8 + 4,
+                    rotation: Math.random() * 360,
+                    rotSpeed: (Math.random() - 0.5) * 12,
+                    opacity: 1
+                });
+            }
+            requestAnimationFrame(updateConfetti);
+        }
+
+        function updateConfetti() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.35;
+                p.rotation += p.rotSpeed;
+                p.opacity -= 0.016;
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate((p.rotation * Math.PI) / 180);
+                ctx.globalAlpha = Math.max(0, p.opacity);
+                ctx.fillStyle = p.color;
+                ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+                ctx.restore();
+
+                if (p.opacity <= 0) {
+                    particles.splice(idx, 1);
+                }
+            });
+
+            if (particles.length > 0) {
+                requestAnimationFrame(updateConfetti);
+            }
+        }
+
+        // Initialization
+        window.onload = function() {
+            buildReelDOM();
+            initBulbs();
+            updateProgressUI();
+
+            // Re-render when font is ready
+            if (document.fonts && document.fonts.ready) {
+                document.fonts.ready.then(() => buildReelDOM(lastDrawnItem));
+            }
+
+            // Click Reel Stage 2: View Image
+            reelWindow.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+
+                if (lastDrawnItem && !isSpinning) {
+                    openImageModalForItem(lastDrawnItem);
+                } else if (!isSpinning) {
+                    startSpin();
+                }
+            });
+
+            // Stage 1: Global click to spin
+            document.addEventListener('click', () => {
+                sounds.init();
+                if (!imageModal.classList.contains('hidden')) return;
+                startSpin();
+            });
+
+            leverAssembly.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+                startSpin();
+            });
+
+            // Music Toggle Button
+            const bgmToggleBtn = document.getElementById('bgmToggleBtn');
+            const bgmIcon = document.getElementById('bgmIcon');
+            const bgmText = document.getElementById('bgmText');
+
+            bgmToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+                const isEnabled = sounds.bgm.toggle();
+                if (isEnabled) {
+                    bgmIcon.className = "fas fa-music text-amber-400";
+                    bgmText.textContent = "音樂: 開";
+                } else {
+                    bgmIcon.className = "fas fa-music text-slate-500 line-through";
+                    bgmText.textContent = "音樂: 關";
+                }
+            });
+
+            // Sound Toggle Button
+            const soundToggleBtn = document.getElementById('soundToggleBtn');
+            const soundIcon = document.getElementById('soundIcon');
+            soundToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.enabled = !sounds.enabled;
+                soundIcon.className = sounds.enabled 
+                    ? "fas fa-volume-up text-amber-400" 
+                    : "fas fa-volume-mute text-slate-500";
+            });
+
+            // Reset Button
+            document.getElementById('resetPoolBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                resetPool();
+            });
+
+            // Modal Close handlers
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeImageModal();
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                buildReelDOM(lastDrawnItem);
+            });
+        };
+    </script>
+</body>
+</html>
