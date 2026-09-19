@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tōng-bu̍t phiⁿ - Slot Machine</title>
+    
+    <!-- Load Iansui (芫荽) font from CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/iansui@5.0.1/index.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Canvas Confetti Library for high-performance celebration -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        /* Force Iansui (芫荽) font globally */
+        * {
+            font-family: 'Iansui', '芫荽', cursive, sans-serif !important;
+        }
+
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: #1a100a;
+        }
+
+        body {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* Warm Coffee & Brass Palette Accents */
+        .bg-coffee-dark { background-color: #2b1810; }
+        .bg-coffee-mid { background-color: #3d2317; }
+        .bg-coffee-card { background-color: #4a2d1d; }
+        .text-brass { color: #f4d068; }
+        .border-brass { border-color: #d4af37; }
+
+        /* Neon Glow Effects for Title */
+        .neon-text-gold {
+            text-shadow: 0 0 8px #f4d068, 0 0 15px #d4af37, 0 0 25px #aa7c11;
+        }
+
+        /* Retro Marquee Lights */
+        .bulb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #3d2817;
+            border: 1px solid #7c5227;
+            transition: background-color 0.15s, box-shadow 0.15s;
+        }
+        .bulb.active-1 {
+            background-color: #ffd700;
+            box-shadow: 0 0 8px #ffd700, 0 0 15px #ffd700;
+        }
+        .bulb.active-2 {
+            background-color: #ff9900;
+            box-shadow: 0 0 8px #ff9900, 0 0 15px #ff9900;
+        }
+        .bulb.active-3 {
+            background-color: #ffe4b5;
+            box-shadow: 0 0 8px #ffe4b5, 0 0 15px #ffe4b5;
+        }
+
+        /* 3D Slot Machine Frame */
+        .slot-machine-body {
+            background: linear-gradient(160deg, #5c3822 0%, #3d2317 40%, #2b1810 100%);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), 0 0 0 4px #8c5a2b, inset 0 2px 4px rgba(255,255,255,0.2);
+            border: 3px solid #d4af37;
+        }
+
+        /* Reel Window styling */
+        .reel-window {
+            background: linear-gradient(to bottom, #120a06 0%, #2b1810 50%, #120a06 100%);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.95), inset 0 -10px 20px rgba(0,0,0,0.95), 0 0 15px rgba(212, 175, 55, 0.4);
+            border: 4px solid #d4af37;
+        }
+
+        /* Glass reflection overlay */
+        .glass-overlay {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.03) 45%, rgba(0,0,0,0) 46%, rgba(0,0,0,0.3) 100%);
+            pointer-events: none;
+        }
+
+        /* Physical 3D Lever Styling */
+        .lever-arm {
+            transform-origin: bottom center;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .lever-pulled .lever-arm {
+            transform: rotateX(65deg) scaleY(0.65);
+        }
+        .lever-ball {
+            box-shadow: inset -3px -3px 8px rgba(0,0,0,0.6), 0 0 12px rgba(220, 38, 38, 0.8);
+            transition: transform 0.15s;
+        }
+        .lever-pulled .lever-ball {
+            transform: translateY(80px) scale(0.9);
+        }
+
+        /* Background grid pattern */
+        .bg-pattern {
+            background-color: #1a100a;
+            background-image: radial-gradient(#3d2317 1.5px, transparent 1.5px);
+            background-size: 28px 28px;
+        }
+    </style>
+</head>
+<body class="bg-pattern h-screen h-[100dvh] text-amber-100 flex flex-col justify-between overflow-hidden relative">
+
+    <!-- Header Bar -->
+    <header class="w-full bg-coffee-dark/90 backdrop-blur border-b border-amber-900/60 pt-3 pb-2 px-4 md:px-8 flex justify-between items-center z-20 flex-shrink-0">
+        <div class="flex items-center gap-2">
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-wide text-brass">
+                Tōng-bu̍t phiⁿ
+            </h1>
+        </div>
+        
+        <!-- Utility buttons -->
+        <div class="flex items-center gap-2" onclick="event.stopPropagation()">
+            <button id="bgmToggleBtn" class="p-2 px-3 rounded-xl bg-coffee-mid hover:bg-amber-900/60 text-brass border border-amber-700/60 transition flex items-center gap-2 text-sm md:text-base" title="電玩風背景音樂">
+                <i class="fas fa-music" id="bgmIcon"></i>
+                <span id="bgmText">BGM: 開</span>
+            </button>
+            <button id="resetBtn" class="p-2 px-3 rounded-xl bg-amber-900/40 hover:bg-amber-800/60 text-amber-200 border border-amber-700/60 text-sm md:text-base transition flex items-center gap-1.5">
+                <i class="fas fa-rotate-right text-brass"></i>
+                <span>重置 (7/7)</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="mainClickArea" class="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 relative cursor-pointer select-none min-h-0">
+        
+        <!-- Remaining Counter Badge -->
+        <div class="mb-3 px-5 py-2 bg-coffee-dark/95 border-2 border-brass/50 rounded-full flex items-center gap-4 shadow-xl backdrop-blur z-20">
+            <div class="text-sm md:text-base text-amber-200">
+                剩餘動物：<span id="remainingCount" class="text-brass font-extrabold text-lg md:text-xl">7 / 7</span>
+            </div>
+            <div class="w-28 bg-coffee-mid h-3 rounded-full overflow-hidden border border-amber-800/80">
+                <div id="progressBar" class="bg-gradient-to-r from-amber-600 to-yellow-400 h-full w-full transition-all duration-300"></div>
+            </div>
+        </div>
+
+        <!-- Slot Machine Assembly -->
+        <div class="relative flex items-center justify-center w-[calc(100%-2rem)] max-w-3xl my-auto">
+            
+            <!-- Machine Body Frame -->
+            <div class="slot-machine-body w-full rounded-3xl p-4 sm:p-6 md:p-8 relative z-10 flex flex-col items-center shadow-2xl">
+                
+                <!-- Marquee Header with Bulbs -->
+                <div class="w-full bg-coffee-dark rounded-2xl p-3 md:p-4 mb-3 md:mb-5 border-2 border-brass/40 flex flex-col items-center relative overflow-hidden shadow-inner">
+                    <!-- Top Bulbs Row -->
+                    <div class="w-full flex justify-between px-2 mb-2" id="topBulbs">
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div><div class="bulb"></div>
+                    </div>
+
+                    <!-- Main Title -->
+                    <div class="text-center py-1">
+                        <div class="text-3xl sm:text-5xl md:text-6xl font-extrabold text-brass tracking-wider neon-text-gold leading-tight">
+                            Tōng-bu̍t phiⁿ
+                        </div>
+                    </div>
+
+                    <!-- Bottom Bulbs Row -->
+                    <div class="w-full flex justify-between px-2 mt-2" id="bottomBulbs">
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div><div class="bulb"></div><div class="bulb"></div>
+                        <div class="bulb"></div><div class="bulb"></div>
+                    </div>
+                </div>
+
+                <!-- Single Reel Slot Window -->
+                <div class="w-full relative my-1">
+                    <div id="reelWindow" class="reel-window rounded-2xl h-44 sm:h-56 md:h-64 w-full overflow-hidden relative cursor-pointer group">
+                        
+                        <!-- Pointer Indicators -->
+                        <div class="absolute inset-x-0 h-full border-y-4 border-brass/90 bg-amber-500/5 z-20 pointer-events-none flex justify-between items-center px-3">
+                            <div class="text-brass text-2xl sm:text-4xl"><i class="fas fa-caret-right"></i></div>
+                            <div class="text-brass text-2xl sm:text-4xl"><i class="fas fa-caret-left"></i></div>
+                        </div>
+
+                        <!-- Glass Gloss Overlay -->
+                        <div class="glass-overlay absolute inset-0 z-25"></div>
+
+                        <!-- Animated Reel Container -->
+                        <div id="reelContainer" class="w-full absolute top-0 left-0 flex flex-col items-center">
+                            <!-- Target items dynamically rendered -->
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- 3D Side Lever -->
+            <div id="leverAssembly" class="relative z-0 hidden sm:block -ml-4 h-56 w-12 cursor-pointer" title="點擊拉桿拉霸">
+                <div class="absolute bottom-4 left-0 w-8 h-14 bg-gradient-to-r from-amber-950 to-coffee-dark rounded-r-xl border-y-2 border-r-2 border-brass/60 shadow-2xl"></div>
+                <div class="absolute bottom-8 left-2 w-6 h-7 bg-amber-700 rounded-r-full shadow-inner border border-amber-500"></div>
+
+                <div id="leverArm" class="lever-arm absolute bottom-10 left-3 w-3.5 h-36 bg-gradient-to-r from-amber-200 via-yellow-100 to-amber-400 rounded-t-full shadow-lg origin-bottom">
+                    <div id="leverBall" class="lever-ball absolute -top-6 -left-3.5 w-10 h-10 bg-gradient-to-tr from-red-800 via-red-600 to-rose-400 rounded-full border-2 border-red-300"></div>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Modal: Image Popup Window (z-[100] with pure image display) -->
+    <div id="imageModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-[100] flex items-center justify-center p-4 hidden" onclick="event.stopPropagation()">
+        <div class="bg-coffee-dark border-4 border-brass rounded-3xl max-w-md w-full p-6 flex flex-col items-center shadow-2xl relative overflow-hidden text-center transform transition-all duration-300 scale-95 opacity-0" id="imageModalBox">
+            
+            <!-- Modal Close Button -->
+            <button class="modal-close absolute top-3 right-3 text-amber-200 hover:text-white bg-coffee-mid hover:bg-amber-900/80 rounded-full w-10 h-10 flex items-center justify-center text-xl transition border border-brass/40 z-10">
+                <i class="fas fa-times"></i>
+            </button>
+
+            <!-- Pure Image Card Display -->
+            <div class="w-full flex items-center justify-center my-2 p-2 bg-coffee-mid/50 rounded-2xl border border-amber-900/50">
+                <img id="modalImage" src="" alt="動物圖片" class="max-h-[60vh] max-w-full object-contain rounded-xl shadow-lg border border-brass/30" />
+            </div>
+
+            <!-- Close Action Button -->
+            <button class="modal-close mt-3 px-8 py-2.5 bg-gradient-to-r from-amber-600 to-yellow-600 hover:from-amber-500 hover:to-yellow-500 text-amber-950 font-extrabold rounded-xl transition shadow-lg text-lg border border-brass">
+                關閉
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // 7 Taiwanese Animal Items mapping strictly to 圖片1.png ~ 圖片7.png
+        const ANIMAL_ITEMS = [
+            { id: 1, pinyin: "hô-bé", file: "圖片1.png" },
+            { id: 2, pinyin: "kî-lîn-lo̍k", file: "圖片2.png" },
+            { id: 3, pinyin: "hoe-tiâu-bé", file: "圖片3.png" },
+            { id: 4, pinyin: "sai-gû", file: "圖片4.png" },
+            { id: 5, pinyin: "chhiūⁿ", file: "圖片5.png" },
+            { id: 6, pinyin: "kâu", file: "圖片6.png" },
+            { id: 7, pinyin: "kho̍k-hî", file: "圖片7.png" }
+        ];
+
+        // 8-Bit Chiptune Arcade Background Music Synthesizer
+        class ChiptuneBgmEngine {
+            constructor() {
+                this.ctx = null;
+                this.isPlaying = false;
+                this.enabled = true;
+                this.timer = null;
+                this.step = 0;
+
+                // 8-bit scale frequencies
+                this.notes = {
+                    'C4': 261.63, 'D4': 293.66, 'E4': 329.63, 'F4': 349.23, 'G4': 392.00, 'A4': 440.00, 'B4': 493.88,
+                    'C5': 523.25, 'D5': 587.33, 'E5': 659.25, 'F5': 698.46, 'G5': 783.99, 'A5': 880.00
+                };
+
+                // Catchy Arcade Chiptune Melody Sequence
+                this.melody = [
+                    'E5', 'E5', '0', 'E5', '0', 'C5', 'E5', '0',
+                    'G5', '0', '0', '0', 'G4', '0', '0', '0',
+                    'C5', '0', '0', 'G4', '0', '0', 'E4', '0',
+                    'A4', '0', 'B4', '0', 'A4', 'G4', 'E4', 'G4'
+                ];
+            }
+
+            init(audioCtx) {
+                if (audioCtx) this.ctx = audioCtx;
+            }
+
+            start() {
+                if (this.isPlaying || !this.enabled || !this.ctx) return;
+                if (this.ctx.state === 'suspended') this.ctx.resume();
+
+                this.isPlaying = true;
+                this.step = 0;
+                
+                // Fast 8-bit tempo (~150ms per step)
+                this.timer = setInterval(() => {
+                    if (!this.isPlaying || !this.enabled) return;
+                    this.playStep();
+                    this.step = (this.step + 1) % this.melody.length;
+                }, 140);
+            }
+
+            stop() {
+                this.isPlaying = false;
+                if (this.timer) {
+                    clearInterval(this.timer);
+                    this.timer = null;
+                }
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                if (this.enabled) {
+                    if (this.ctx) this.start();
+                } else {
+                    this.stop();
+                }
+                return this.enabled;
+            }
+
+            playStep() {
+                if (!this.ctx || this.ctx.state !== 'running') return;
+                const noteName = this.melody[this.step];
+                if (noteName === '0' || !this.notes[noteName]) return;
+
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                // Authentic 8-bit square wave tone
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(this.notes[noteName], now);
+
+                gain.gain.setValueAtTime(0.02, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.13);
+            }
+        }
+
+        // Sound Effects Engine
+        class SoundEngine {
+            constructor() {
+                this.ctx = null;
+                this.bgm = new ChiptuneBgmEngine();
+            }
+
+            init() {
+                if (!this.ctx) {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (AudioContext) {
+                        this.ctx = new AudioContext();
+                        this.bgm.init(this.ctx);
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
+                if (this.bgm.enabled && !this.bgm.isPlaying) {
+                    this.bgm.start();
+                }
+            }
+
+            playLeverSound() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(220, now);
+                osc.frequency.exponentialRampToValueAtTime(60, now + 0.18);
+
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.18);
+            }
+
+            playTickSound() {
+                this.init();
+                if (!this.ctx) return;
+                const now = this.ctx.currentTime;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(600 + Math.random() * 100, now);
+
+                gain.gain.setValueAtTime(0.08, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(now);
+                osc.stop(now + 0.03);
+            }
+
+            playFanfareSound() {
+                this.init();
+                if (!this.ctx) return;
+                const notes = [523.25, 659.25, 783.99, 1046.50];
+                notes.forEach((freq, idx) => {
+                    const now = this.ctx.currentTime + idx * 0.09;
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(freq, now);
+
+                    gain.gain.setValueAtTime(0.12, now);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                });
+            }
+        }
+
+        const sounds = new SoundEngine();
+
+        // Game State Variables
+        let availablePool = [];
+        let currentTargetItem = null;
+        let isSpinning = false;
+        let bulbPhase = 0;
+        let bulbInterval = null;
+
+        // DOM Elements
+        const reelContainer = document.getElementById('reelContainer');
+        const reelWindow = document.getElementById('reelWindow');
+        const leverArm = document.getElementById('leverArm');
+        const leverAssembly = document.getElementById('leverAssembly');
+        const imageModal = document.getElementById('imageModal');
+        const imageModalBox = document.getElementById('imageModalBox');
+        const modalImage = document.getElementById('modalImage');
+        const remainingCountEl = document.getElementById('remainingCount');
+        const progressBarEl = document.getElementById('progressBar');
+
+        function getItemHeight() {
+            return reelWindow ? reelWindow.clientHeight : 220;
+        }
+
+        // Initialize Fisher-Yates non-repeating pool
+        function resetPool() {
+            availablePool = [...ANIMAL_ITEMS];
+            // Fisher-Yates Shuffle
+            for (let i = availablePool.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availablePool[i], availablePool[j]] = [availablePool[j], availablePool[i]];
+            }
+            currentTargetItem = null;
+            updateProgressUI();
+            buildReelDOM();
+        }
+
+        // Construct 12+ Rotations Reel Strip DOM Elements
+        function buildReelDOM(targetItem = null) {
+            reelContainer.innerHTML = '';
+            const itemHeight = getItemHeight();
+            
+            // Generate a 15-cycle repeating strip for 12+ full rotations
+            const extendedList = [];
+            for (let i = 0; i < 15; i++) {
+                extendedList.push(...ANIMAL_ITEMS);
+            }
+
+            extendedList.forEach((item) => {
+                const itemEl = document.createElement('div');
+                itemEl.className = 'w-full flex items-center justify-center px-4 text-center flex-shrink-0';
+                itemEl.style.height = `${itemHeight}px`;
+                
+                // Extra Large Answer Display Text with Iansui Font
+                itemEl.innerHTML = `
+                    <div class="text-5xl sm:text-7xl md:text-8xl font-extrabold text-brass tracking-wider drop-shadow-lg leading-none">
+                        ${item.pinyin}
+                    </div>
+                `;
+                reelContainer.appendChild(itemEl);
+            });
+            
+            if (targetItem) {
+                const targetIndex = ANIMAL_ITEMS.findIndex(a => a.id === targetItem.id);
+                setReelPosition(14 * ANIMAL_ITEMS.length + targetIndex, false);
+            } else {
+                setReelPosition(0, false);
+            }
+        }
+
+        function setReelPosition(index, animate = false) {
+            const itemHeight = getItemHeight();
+            const targetY = -(index * itemHeight);
+            
+            if (!animate) {
+                reelContainer.style.transition = 'none';
+            }
+            reelContainer.style.transform = `translateY(${targetY}px)`;
+        }
+
+        // Marquee Bulb Animation Loop
+        function initBulbs() {
+            const topBulbs = document.querySelectorAll('#topBulbs .bulb');
+            const bottomBulbs = document.querySelectorAll('#bottomBulbs .bulb');
+            const allBulbs = [...topBulbs, ...bottomBulbs];
+
+            bulbInterval = setInterval(() => {
+                bulbPhase = (bulbPhase + 1) % 3;
+                allBulbs.forEach((bulb, idx) => {
+                    bulb.classList.remove('active-1', 'active-2', 'active-3');
+                    if ((idx + bulbPhase) % 3 === 0) bulb.classList.add('active-1');
+                    else if ((idx + bulbPhase) % 3 === 1) bulb.classList.add('active-2');
+                    else bulb.classList.add('active-3');
+                });
+            }, 250);
+        }
+
+        function startSpin() {
+            if (isSpinning) return;
+
+            // Auto reset when pool is exhausted
+            if (availablePool.length === 0) {
+                resetPool();
+            }
+
+            isSpinning = true;
+
+            sounds.init();
+            sounds.playLeverSound();
+            triggerLeverAnimation();
+
+            // Pick the next non-repeating item
+            const selectedItem = availablePool.pop();
+            currentTargetItem = selectedItem;
+
+            updateProgressUI();
+
+            const animalIndexInList = ANIMAL_ITEMS.findIndex(a => a.id === selectedItem.id);
+            
+            // Exactly 12 Full Rotations = 12 * 7 = 84 steps + offset
+            const totalItemSteps = 12 * ANIMAL_ITEMS.length + animalIndexInList;
+            
+            const totalDuration = 3200; // 3.2 seconds
+            const startTime = performance.now();
+            const itemHeight = getItemHeight();
+            
+            let lastStepIndex = 0;
+
+            // Smooth cubic ease-out rotational animation with precise ticking audio per boundary
+            function animateReel(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / totalDuration, 1);
+                
+                // Cubic ease-out curve
+                const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+                const currentStep = easeOutProgress * totalItemSteps;
+                
+                const currentY = -(currentStep * itemHeight);
+                reelContainer.style.transition = 'none';
+                reelContainer.style.transform = `translateY(${currentY}px)`;
+
+                // Play mechanical tick sound on crossing item boundaries
+                const currentFloorStep = Math.floor(currentStep);
+                if (currentFloorStep > lastStepIndex) {
+                    sounds.playTickSound();
+                    lastStepIndex = currentFloorStep;
+                }
+
+                if (progress < 1) {
+                    requestAnimationFrame(animateReel);
+                } else {
+                    // Lock exactly at final target
+                    setReelPosition(totalItemSteps, false);
+                    sounds.playFanfareSound();
+                    isSpinning = false;
+                }
+            }
+
+            requestAnimationFrame(animateReel);
+        }
+
+        function triggerLeverAnimation() {
+            leverAssembly.classList.add('lever-pulled');
+            setTimeout(() => {
+                leverAssembly.classList.remove('lever-pulled');
+            }, 250);
+        }
+
+        function updateProgressUI() {
+            const total = ANIMAL_ITEMS.length;
+            const remaining = availablePool.length;
+            remainingCountEl.textContent = `${remaining} / ${total}`;
+            const percentage = (remaining / total) * 100;
+            progressBarEl.style.width = `${percentage}%`;
+        }
+
+        function openImageModalForItem(item) {
+            if (!item) return;
+
+            // Load exact image file (圖片1.png ~ 圖片7.png)
+            modalImage.src = item.file;
+
+            // Trigger high z-index confetti celebration overlay
+            if (window.confetti) {
+                window.confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    zIndex: 1000
+                });
+            }
+
+            // Display pure modal window
+            imageModal.classList.remove('hidden');
+            setTimeout(() => {
+                imageModalBox.classList.remove('scale-95', 'opacity-0');
+                imageModalBox.classList.add('scale-100', 'opacity-100');
+            }, 20);
+        }
+
+        function closeImageModal() {
+            imageModalBox.classList.remove('scale-100', 'opacity-100');
+            imageModalBox.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                imageModal.classList.add('hidden');
+            }, 200);
+        }
+
+        window.onload = function() {
+            resetPool();
+            initBulbs();
+
+            // Click Reel Window or Result Card
+            reelWindow.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+
+                if (currentTargetItem && !isSpinning) {
+                    openImageModalForItem(currentTargetItem);
+                } else if (!isSpinning) {
+                    startSpin();
+                }
+            });
+
+            // Click anywhere on main screen triggers spin or modal view
+            document.getElementById('mainClickArea').addEventListener('click', (e) => {
+                sounds.init();
+                if (!imageModal.classList.contains('hidden')) return;
+
+                if (currentTargetItem && !isSpinning) {
+                    openImageModalForItem(currentTargetItem);
+                } else {
+                    startSpin();
+                }
+            });
+
+            // Lever Click
+            leverAssembly.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+                startSpin();
+            });
+
+            // BGM Toggle Button
+            const bgmToggleBtn = document.getElementById('bgmToggleBtn');
+            const bgmIcon = document.getElementById('bgmIcon');
+            const bgmText = document.getElementById('bgmText');
+
+            bgmToggleBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+                const isEnabled = sounds.bgm.toggle();
+                if (isEnabled) {
+                    bgmIcon.className = "fas fa-music text-brass";
+                    bgmText.textContent = "BGM: 開";
+                } else {
+                    bgmIcon.className = "fas fa-music text-amber-800 line-through";
+                    bgmText.textContent = "BGM: 關";
+                }
+            });
+
+            // Manual Reset Button
+            document.getElementById('resetBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                sounds.init();
+                resetPool();
+            });
+
+            // Modal Close handlers
+            document.querySelectorAll('.modal-close').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    closeImageModal();
+                });
+            });
+
+            // Resize Handler
+            window.addEventListener('resize', () => {
+                buildReelDOM(currentTargetItem);
+            });
+        };
+    </script>
+</body>
+</html>
