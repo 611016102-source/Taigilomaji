@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台語羅馬字結合韻練習</title>
+  <!-- 載入芫荽體 (Iansui) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/iansui@5.0.1/index.css">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: 'Iansui', "Coriander", cursive, sans-serif;
+      background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 30px 20px;
+      cursor: pointer;
+    }
+
+    /* 標題：強制單行顯示，不換行 */
+    .header-title {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 900;
+      color: #0c4a6e;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.08);
+      white-space: nowrap;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* 卡片容器 */
+    .card-container {
+      width: clamp(300px, 80vw, 680px);
+      height: clamp(240px, 55vh, 450px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+
+    /* 卡片本體：金黃色雙層粗體外框與質感陰影 */
+    .card {
+      width: 100%;
+      height: 100%;
+      background: #ffffff;
+      border-radius: 36px;
+      /* 金黃色粗外框與雙重光暈效果 */
+      border: 10px solid #f59e0b;
+      outline: 4px solid #fef3c7;
+      box-shadow: 
+        0 20px 40px -10px rgba(217, 119, 6, 0.3),
+        0 10px 20px -5px rgba(0, 0, 0, 0.1),
+        inset 0 0 15px rgba(245, 158, 11, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: transform 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      padding: 20px;
+    }
+
+    .card.click-effect {
+      transform: scale(0.95);
+    }
+
+    /* 卡片文字：芫荽體加大加粗 */
+    .card-text {
+      font-size: clamp(56px, 10vw, 120px);
+      font-weight: 900;
+      color: #3b1d00;
+      text-align: center;
+      line-height: 1.25;
+      letter-spacing: 2px;
+      word-break: break-word;
+    }
+
+    .card-text .sub-line {
+      font-size: clamp(36px, 6.5vw, 75px);
+      display: block;
+      margin: 4px 0;
+    }
+
+    /* 底部計數頁碼 */
+    .counter {
+      font-size: clamp(18px, 3vw, 24px);
+      font-weight: 700;
+      color: #0284c7;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 8px 24px;
+      border-radius: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- 標題 -->
+  <div class="header-title">台語羅馬字結合韻練習</div>
+
+  <!-- 字卡區塊 -->
+  <div class="card-container">
+    <div class="card" id="card">
+      <div class="card-text" id="vowel-text">ai</div>
+    </div>
+  </div>
+
+  <!-- 輪次與進度 -->
+  <div class="counter" id="counter-text">1 / 10</div>
+
+  <script>
+    // 10 張指定結合韻卡片
+    const cards = [
+      "ai",
+      "au",
+      "ia",
+      "iu",
+      "io",
+      "iau",
+      '<span class="sub-line">台羅 ua</span><span class="sub-line">教羅 oa</span>',
+      '<span class="sub-line">台羅 ue</span><span class="sub-line">教羅 oe</span>',
+      '<span class="sub-line">台羅 uai</span><span class="sub-line">教羅 oai</span>',
+      "ui"
+    ];
+
+    let currentDeck = [];
+    let currentIndex = 0;
+    let audioCtx = null;
+
+    // 洗牌演算法 (Fisher-Yates)
+    function shuffleDeck() {
+      currentDeck = [...cards];
+      for (let i = currentDeck.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [currentDeck[i], currentDeck[j]] = [currentDeck[j], currentDeck[i]];
+      }
+      currentIndex = 0;
+    }
+
+    // Web Audio 音效
+    function playSwitchSound() {
+      try {
+        if (!audioCtx) {
+          audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+        osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.08); // A5
+
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.08);
+      } catch (e) {
+        // 忽略不支援 Web Audio 的情境
+      }
+    }
+
+    // 切換下一張卡片
+    function nextCard() {
+      playSwitchSound();
+
+      const cardEl = document.getElementById('card');
+      const textEl = document.getElementById('vowel-text');
+      const counterEl = document.getElementById('counter-text');
+
+      cardEl.classList.add('click-effect');
+      setTimeout(() => cardEl.classList.remove('click-effect'), 150);
+
+      // 如果抽完一輪 10 張，重新洗牌
+      if (currentIndex >= currentDeck.length) {
+        shuffleDeck();
+      }
+
+      textEl.innerHTML = currentDeck[currentIndex];
+      counterEl.textContent = `${currentIndex + 1} / 10`;
+
+      currentIndex++;
+    }
+
+    // 初始化第一輪
+    shuffleDeck();
+    document.getElementById('vowel-text').innerHTML = currentDeck[0];
+    document.getElementById('counter-text').textContent = `1 / 10`;
+    currentIndex = 1;
+
+    // 全螢幕點擊與按鍵事件
+    document.body.addEventListener('click', nextCard);
+    document.body.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      nextCard();
+    }, { passive: false });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space' || e.code === 'ArrowRight' || e.code === 'ArrowLeft') {
+        nextCard();
+      }
+    });
+  </script>
+</body>
+</html>
