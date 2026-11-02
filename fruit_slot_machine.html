@@ -1,0 +1,102 @@
+<!-- ... existing code ... -->
+                <!-- Interactive Buttons Tray inside Cabinet -->
+                <div class="w-full mt-7 flex justify-center items-center space-x-3">
+                    <button id="spin-btn" class="w-full py-4 px-8 bg-gradient-to-r from-rose-500 via-pink-600 to-purple-600 hover:from-rose-400 hover:to-purple-500 active:scale-95 transition-all duration-150 rounded-2xl font-black text-xl sm:text-2xl shadow-[0_8px_25px_rgba(244,63,94,0.4)] border border-rose-300/40 flex items-center justify-center space-x-2">
+                        <span>🎰 啟動拉霸</span>
+                    </button>
+                </div>
+
+                <!-- Side Mechanical Lever -->
+                <div id="lever-container" class="lever-wrapper" title="點擊拉動手把">
+                    <div class="lever-base"></div>
+                    <div class="lever-stem">
+                        <div class="lever-ball"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+<!-- ... existing code ... -->
+        // Global Spin Trigger Function
+        function spin() {
+            if (isSpinning) return;
+            initAudio();
+
+            if (soundEnabled) soundEffects.pull();
+
+            // Pull lever animation
+            const leverContainer = document.getElementById('lever-container');
+            leverContainer.classList.add('pulled');
+            setTimeout(() => {
+                leverContainer.classList.remove('pulled');
+            }, 600);
+
+            // Execute reel spin sequence
+            performSpin();
+        }
+
+        // Expose spin globally so inline onclick or external callers can safely access it
+        window.spin = spin;
+
+        // Perform actual spin logic
+        function performSpin() {
+            isSpinning = true;
+            document.getElementById('spin-btn').disabled = true;
+
+            const nextId = drawNextFruit();
+            const cardHeight = window.innerWidth >= 640 ? 420 : 300;
+            const dummyCount = 20;
+
+            const targetIndex = dummyCount; 
+            const targetY = -(targetIndex * cardHeight);
+
+            // Render reel strip items
+            const strip = document.getElementById('reel-strip');
+            let stripHTML = '';
+            
+            for (let i = 0; i < dummyCount; i++) {
+                const randomId = pool[Math.floor(Math.random() * pool.length)];
+                stripHTML += createCardElement(randomId);
+            }
+            stripHTML += createCardElement(nextId);
+
+            strip.innerHTML = stripHTML;
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0px)';
+
+            // Force reflow
+            strip.offsetHeight;
+
+            // Start audio ticker
+            let tickInterval;
+            if (soundEnabled) {
+                tickInterval = setInterval(() => {
+                    soundEffects.tick();
+                }, 90);
+            }
+
+            // Animate spin with cubic-bezier easing
+            strip.style.transition = 'transform 2.5s cubic-bezier(0.15, 0.85, 0.35, 1.0)';
+            strip.style.transform = `translateY(${targetY}px)`;
+
+            setTimeout(() => {
+                if (tickInterval) clearInterval(tickInterval);
+                if (soundEnabled) soundEffects.win();
+
+                isSpinning = false;
+                document.getElementById('spin-btn').disabled = false;
+
+                // Add to round history display
+                addHistoryItem(nextId);
+            }, 2500);
+        }
+
+        // Attach event listeners after DOM readiness
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('spin-btn')?.addEventListener('click', spin);
+            document.getElementById('lever-container')?.addEventListener('click', spin);
+            initPool();
+        });
+    </script>
+</body>
+</html>
