@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>【果子篇-照片版】</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Iansui (芫荽) -->
+    <link href="https://fonts.googleapis.com/css2?family=Iansui&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Iansui', '"芫荽"', 'cursive', 'sans-serif'],
+                    },
+                    animation: {
+                        'pop-in': 'popIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards',
+                        'bounce-subtle': 'bounceSubtle 2s infinite',
+                    },
+                    keyframes: {
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.5) translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' }
+                        },
+                        bounceSubtle: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-4px)' }
+                        },
+                        slotSpin: {
+                            '0%': { transform: 'translateY(0%)' },
+                            '100%': { transform: 'translateY(-80%)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        * {
+            font-family: 'Iansui', '芫荽', cursive, sans-serif !important;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            height: 100dvh;
+            width: 100vw;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        /* Yellow Polka Dot Background Theme */
+        body {
+            background-color: #fefce8; /* Yellow 50 */
+            background-image: radial-gradient(#eab308 2px, transparent 2px); /* Amber 500 dot grid */
+            background-size: 22px 22px;
+        }
+
+        .cute-card-shadow {
+            box-shadow: 0 4px 0px 0px rgba(234, 179, 8, 0.3), 0 6px 10px -2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .cute-focus-shadow {
+            box-shadow: 0 12px 0px 0px rgba(234, 179, 8, 0.4), 0 16px 25px -5px rgba(0, 0, 0, 0.12);
+        }
+
+        /* Prevent overlap and keep clean borders */
+        .card-box {
+            container-type: inline-size;
+            position: relative;
+            background-color: #ffffff !important;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-[100dvh] w-screen flex flex-col justify-between select-none overflow-hidden cursor-pointer p-0 m-0">
+
+    <header class="bg-white/95 backdrop-blur-md border-b-2 border-amber-300 sticky top-0 z-30 px-3 py-1.5 sm:py-2 shadow-sm shrink-0">
+        <div class="max-w-6xl mx-auto flex items-center justify-between gap-2">
+            
+            <!-- Title -->
+            <div class="flex items-center space-x-2 min-w-0">
+                <div class="bg-amber-500 text-white font-black px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-xl shadow-sm text-xs sm:text-base animate-bounce-subtle shrink-0">
+                    <i class="fa-solid fa-apple-whole"></i>
+                </div>
+                <h1 class="text-base sm:text-xl md:text-2xl font-black tracking-wide text-amber-950 drop-shadow-sm truncate">
+                    【果子篇-照片版】
+                </h1>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center space-x-1.5 sm:space-x-2 shrink-0">
+                <!-- Reset Progress -->
+                <button id="resetDrawsBtn" class="p-1.5 sm:p-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border-2 border-amber-300 transition active:scale-95" title="重置進度">
+                    <i class="fa-solid fa-rotate-right text-xs sm:text-base"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-6xl mx-auto w-full px-2 sm:px-4 py-1.5 sm:py-2 flex-1 flex flex-col justify-between overflow-hidden gap-1.5 sm:gap-2 min-h-0">
+        
+        <!-- Progress Indicator -->
+        <div class="flex items-center justify-between text-xs sm:text-sm font-black text-slate-600 bg-white/90 px-3 sm:px-4 py-1 sm:py-1.5 rounded-xl border-2 border-amber-300 shadow-sm max-w-xs sm:max-w-sm mx-auto w-full shrink-0">
+            <span>複習進度</span>
+            <div class="flex items-center space-x-2">
+                <div class="w-20 sm:w-36 bg-amber-100 h-2 sm:h-2.5 rounded-full overflow-hidden border border-amber-300">
+                    <div id="progressBar" class="bg-gradient-to-r from-amber-400 to-yellow-500 h-full transition-all duration-300 w-0"></div>
+                </div>
+                <span class="text-amber-950 font-black"><span id="drawnCardsCount">0</span> / <span id="totalCardsCount">18</span></span>
+            </div>
+        </div>
+
+        <!-- Dynamic Card Rows Container -->
+        <div id="rowsContainer" class="flex-1 flex flex-col justify-between gap-1.5 sm:gap-2 max-w-6xl mx-auto w-full min-h-0 py-1">
+            <!-- Rendered by JS -->
+        </div>
+
+    </main>
+
+    <!-- Enlarged Card Focus Modal -->
+    <div id="focusModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex flex-col items-center justify-between p-3 sm:p-6 hidden opacity-0 transition-opacity duration-300">
+        
+        <!-- Modal Top Control Bar -->
+        <div class="w-full max-w-3xl flex items-center justify-between z-10 shrink-0">
+            <div class="px-3 sm:px-4 py-1 sm:py-1.5 bg-white/95 rounded-full border-2 border-amber-300 flex items-center gap-2 text-slate-700 text-xs sm:text-sm font-black shadow-sm">
+                <span id="slotStatusDot" class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping"></span>
+                <span id="modalProgressText">1 / 18</span>
+            </div>
+
+            <button id="closeFocusModalBtn" class="p-2 text-slate-500 hover:text-slate-800 bg-white hover:bg-slate-100 rounded-full transition border-2 border-slate-200 shadow-sm">
+                <i class="fa-solid fa-xmark text-lg sm:text-xl w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center"></i>
+            </button>
+        </div>
+
+        <!-- Enlarged Card Area -->
+        <div id="cardStage" class="flex-1 w-full max-w-2xl my-auto flex items-center justify-center cursor-pointer p-2 min-h-0">
+            <div id="focusCard" class="w-full h-[65vh] max-h-[500px] bg-white rounded-3xl border-4 sm:border-8 border-amber-400 cute-focus-shadow p-3 sm:p-6 flex flex-col items-center justify-center relative overflow-hidden transform transition-all duration-300 hover:scale-[1.01]">
+                
+                <!-- Radial Glow Effects -->
+                <div class="absolute -top-16 -right-16 w-40 sm:w-52 h-40 sm:h-52 bg-amber-200/60 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute -bottom-16 -left-16 w-40 sm:w-52 h-40 sm:h-52 bg-yellow-200/60 rounded-full blur-2xl pointer-events-none"></div>
+
+                <!-- Slot Machine Spinner Overlay & Container -->
+                <div class="my-auto flex items-center justify-center w-full h-full p-2 relative z-10 overflow-hidden">
+                    <!-- Spinning Strip Container -->
+                    <div id="slotStrip" class="w-full h-full flex flex-col items-center justify-center space-y-4">
+                        <img id="modalFruitImg" src="" alt="果子照片" class="w-full h-full object-contain rounded-2xl drop-shadow-md select-none" />
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 18 Fruit Image Items arranged into 3 rows ---
+        // Updated mapping based on user photo numbers (71 = 鳳梨, 65 = 香蕉)
+        const DEFAULT_ROW_GROUPS = [
+            [
+                { name: '蘋果', id: '64' },
+                { name: '鳳梨', id: '71' }, 
+                { name: '櫻桃', id: '66' },
+                { name: '橘子', id: '67' },
+                { name: '木瓜', id: '68' },
+                { name: '芭樂', id: '69' }
+            ],
+            [
+                { name: '酪梨', id: '70' },
+                { name: '香蕉', id: '65' }, // 已修正：65 對應香蕉
+                { name: '荔枝', id: '72' },
+                { name: '芒果', id: '73' },
+                { name: '枇杷', id: '74' },
+                { name: '葡萄', id: '75' }
+            ],
+            [
+                { name: '西瓜', id: '76' },
+                { name: '香蕉', id: '77' },
+                { name: '百香果', id: '78' },
+                { name: '奇異果', id: '79' },
+                { name: '火龍果', id: '80' },
+                { name: '香蕉', id: '65' } // 修正第 3 列對應香蕉檔名
+            ]
+        ];
+
+        let ROW_GROUPS = JSON.parse(JSON.stringify(DEFAULT_ROW_GROUPS));
+
+        // Get custom color themes for each row
+        function getRegionTheme(rowIndex) {
+            const themes = [
+                { bg: 'bg-amber-50', border: 'border-amber-400' },
+                { bg: 'bg-emerald-50', border: 'border-emerald-400' },
+                { bg: 'bg-rose-50', border: 'border-rose-400' }
+            ];
+            return themes[rowIndex % themes.length];
+        }
+
+        // Handle Image Error by showing clean placeholder with precise filename instructions
+        function handleImageError(imgElem, item) {
+            imgElem.onerror = null;
+            const parent = imgElem.parentElement;
+            if (parent) {
+                parent.innerHTML = `
+                    <div class="flex flex-col items-center justify-center text-amber-500 p-2 text-center h-full w-full bg-amber-50/50 rounded-lg">
+                        <i class="fa-regular fa-image text-2xl sm:text-3xl mb-1 text-amber-400"></i>
+                        <span class="text-xs sm:text-sm font-black text-amber-900">${item.name}</span>
+                        <span class="text-[10px] sm:text-xs text-amber-600 font-sans font-bold">請放入 ${item.id}.png</span>
+                    </div>
+                `;
+            }
+        }
+
+        // State variables
+        let allCards = [];
+        let drawnCardIds = new Set();
+        let currentFocusIndex = -1;
+        let isSpinning = false;
+
+        // Sound effect (Web Audio API)
+        function playChime() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                osc.frequency.exponentialRampToValueAtTime(880, audioCtx.currentTime + 0.15); // A5
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.25);
+            } catch (e) {
+                // Ignore audio restriction errors
+            }
+        }
+
+        // Slot Spin Sound Ticks
+        function playSpinSound() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const startTime = audioCtx.currentTime;
+                const duration = 3.0;
+                let currentTick = 0;
+                
+                function tick() {
+                    if (audioCtx.currentTime - startTime > duration) return;
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300 + Math.random() * 200, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+
+                    currentTick++;
+                    const nextInterval = 60 + Math.pow(currentTick, 1.4) * 4;
+                    setTimeout(tick, nextInterval);
+                }
+                tick();
+            } catch(e) {}
+        }
+
+        // Build Flattened Cards List
+        function initCards() {
+            allCards = [];
+            ROW_GROUPS.forEach((row, rIdx) => {
+                row.forEach((item, cIdx) => {
+                    allCards.push({
+                        ...item,
+                        uniqueId: `card-${rIdx}-${cIdx}`,
+                        rowIndex: rIdx,
+                        colIndex: cIdx
+                    });
+                });
+            });
+            updateProgress();
+        }
+
+        // Update Progress UI
+        function updateProgress() {
+            const count = drawnCardIds.size;
+            const total = allCards.length;
+            document.getElementById('drawnCardsCount').innerText = count;
+            document.getElementById('totalCardsCount').innerText = total;
+            const pct = total > 0 ? (count / total) * 100 : 0;
+            document.getElementById('progressBar').style.width = `${pct}%`;
+        }
+
+        // Render Cards Grid
+        function renderBoard() {
+            const container = document.getElementById('rowsContainer');
+            container.innerHTML = '';
+
+            ROW_GROUPS.forEach((row, rIdx) => {
+                const theme = getRegionTheme(rIdx);
+                const rowDiv = document.createElement('div');
+                rowDiv.className = `flex-1 grid grid-cols-6 gap-1.5 sm:gap-2.5 w-full min-h-0 items-stretch`;
+
+                row.forEach((item, cIdx) => {
+                    const uniqueId = `card-${rIdx}-${cIdx}`;
+                    const isDrawn = drawnCardIds.has(uniqueId);
+                    
+                    const cardBtn = document.createElement('button');
+                    cardBtn.id = uniqueId;
+                    cardBtn.className = `card-box relative w-full h-full rounded-xl sm:rounded-2xl border-2 sm:border-4 ${theme.border} bg-white cute-card-shadow flex items-center justify-center p-1 sm:p-2 transition-all duration-200 transform hover:scale-[1.02] active:scale-95 ${isDrawn ? 'opacity-40 ring-2 ring-amber-400' : ''}`;
+                    
+                    cardBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        openCardFocus(uniqueId, false); // Direct click shows without spin delay
+                    };
+
+                    cardBtn.innerHTML = `
+                        <div class="w-full h-full flex items-center justify-center pointer-events-none overflow-hidden rounded-lg bg-white">
+                            <img src="${item.id}.png" 
+                                 alt="${item.name}" 
+                                 onerror="handleImageError(this, ${JSON.stringify(item).replace(/"/g, '&quot;')})" 
+                                 class="max-w-full max-h-full object-contain rounded-md select-none" />
+                        </div>
+                    `;
+
+                    rowDiv.appendChild(cardBtn);
+                });
+
+                container.appendChild(rowDiv);
+            });
+        }
+
+        // Pick Random Card (With 3-Second Slot Machine Spin Effect)
+        function drawRandomCard() {
+            if (isSpinning) return;
+
+            const undrawn = allCards.filter(c => !drawnCardIds.has(c.uniqueId));
+            let targetCard;
+            if (undrawn.length === 0) {
+                const randomIndex = Math.floor(Math.random() * allCards.length);
+                targetCard = allCards[randomIndex];
+            } else {
+                const randomIndex = Math.floor(Math.random() * undrawn.length);
+                targetCard = undrawn[randomIndex];
+            }
+
+            openCardFocus(targetCard.uniqueId, true);
+        }
+
+        // Open Card Modal (Optionally Triggering 3s Slot Machine Animation)
+        function openCardFocus(uniqueId, enableSpin = false) {
+            const cardObj = allCards.find(c => c.uniqueId === uniqueId);
+            if (!cardObj) return;
+
+            const modal = document.getElementById('focusModal');
+            const focusCard = document.getElementById('focusCard');
+            const slotStrip = document.getElementById('slotStrip');
+            
+            currentFocusIndex = allCards.findIndex(c => c.uniqueId === uniqueId);
+            document.getElementById('modalProgressText').innerText = enableSpin ? "抽卡中..." : `${currentFocusIndex + 1} / ${allCards.length}`;
+
+            modal.classList.remove('hidden');
+            requestAnimationFrame(() => {
+                modal.classList.remove('opacity-0');
+                focusCard.classList.add('animate-pop-in');
+            });
+
+            if (enableSpin) {
+                isSpinning = true;
+                playSpinSound();
+
+                // Generate rapid slot machine flickering images
+                let shuffleList = [...allCards].sort(() => 0.5 - Math.random());
+                slotStrip.innerHTML = '';
+                
+                // Build a strip of random fruit cards ending on target card
+                shuffleList.slice(0, 15).concat(cardObj).forEach(item => {
+                    const img = document.createElement('img');
+                    img.src = `${item.id}.png`;
+                    img.alt = item.name;
+                    img.className = "w-full h-full object-contain rounded-2xl drop-shadow-md select-none shrink-0";
+                    img.onerror = function() { handleImageError(this, item); };
+                    slotStrip.appendChild(img);
+                });
+
+                // Rapid timer effect switching images over 3 seconds
+                let spinInterval = 70;
+                let elapsed = 0;
+                let currentIdx = 0;
+                
+                const spinStep = () => {
+                    elapsed += spinInterval;
+                    currentIdx = (currentIdx + 1) % slotStrip.children.length;
+                    
+                    for(let i = 0; i < slotStrip.children.length; i++) {
+                        slotStrip.children[i].style.display = (i === currentIdx) ? 'block' : 'none';
+                    }
+
+                    if (elapsed < 3000) {
+                        spinInterval += 5; // Slow down gradually
+                        setTimeout(spinStep, spinInterval);
+                    } else {
+                        // Show final target image
+                        for(let i = 0; i < slotStrip.children.length; i++) {
+                            slotStrip.children[i].style.display = (i === slotStrip.children.length - 1) ? 'block' : 'none';
+                        }
+                        isSpinning = false;
+                        drawnCardIds.add(uniqueId);
+                        updateProgress();
+                        renderBoard();
+                        playChime();
+                        document.getElementById('modalProgressText').innerText = `${currentFocusIndex + 1} / ${allCards.length}`;
+                    }
+                };
+
+                spinStep();
+
+            } else {
+                // Direct Display without spin
+                slotStrip.innerHTML = `
+                    <img id="modalFruitImg" src="${cardObj.id}.png" alt="${cardObj.name}" onerror="handleImageError(this, ${JSON.stringify(cardObj).replace(/"/g, '&quot;')})" class="w-full h-full object-contain rounded-2xl drop-shadow-md select-none" />
+                `;
+                drawnCardIds.add(uniqueId);
+                updateProgress();
+                renderBoard();
+                playChime();
+            }
+        }
+
+        // Close Modal
+        function closeModal() {
+            if (isSpinning) return;
+            const modal = document.getElementById('focusModal');
+            const focusCard = document.getElementById('focusCard');
+            modal.classList.add('opacity-0');
+            focusCard.classList.remove('animate-pop-in');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 250);
+        }
+
+        // Initialize App & Event Listeners
+        window.onload = function() {
+            initCards();
+            renderBoard();
+
+            // Click anywhere to draw random card
+            document.body.addEventListener('click', (e) => {
+                if (e.target.closest('button') || e.target.closest('#focusModal')) return;
+                drawRandomCard();
+            });
+
+            // Context menu click (right-click) support for draw
+            document.body.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                drawRandomCard();
+            });
+
+            // Close Modal button
+            document.getElementById('closeFocusModalBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeModal();
+            });
+
+            // Focus stage click closes modal or draws next
+            document.getElementById('focusModal').addEventListener('click', (e) => {
+                if (e.target.closest('#focusCard')) {
+                    e.stopPropagation();
+                    if (!isSpinning) drawRandomCard();
+                } else {
+                    closeModal();
+                }
+            });
+
+            // Reset progress
+            document.getElementById('resetDrawsBtn').addEventListener('click', (e) => {
+                e.stopPropagation();
+                drawnCardIds.clear();
+                updateProgress();
+                renderBoard();
+            });
+
+            // Keyboard / Presenter clicker support
+            window.addEventListener('keydown', (e) => {
+                if (e.code === 'Space' || e.code === 'PageDown' || e.code === 'PageUp' || e.code === 'ArrowRight' || e.code === 'ArrowDown') {
+                    e.preventDefault();
+                    drawRandomCard();
+                } else if (e.code === 'Escape') {
+                    closeModal();
+                }
+            });
+        };
+    </script>
+</body>
+</html>
