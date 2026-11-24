@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="h-full w-full overflow-hidden">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>白話字-聲母+韻母 - 單欄拉霸教學遊戲</title>
+    
+    <!-- Preload and load Iansui font with fallback link tags -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.css" as="style" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.css" crossorigin="anonymous">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* CSS Dual-Channel Font-Face Declaration */
+        @font-face {
+            font-family: 'Iansui';
+            src: url('https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.woff2') format('woff2'),
+                 url('https://cdn.jsdelivr.net/gh/cmex-tw/iansui/webfont/iansui.woff') format('woff');
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
+        }
+
+        body {
+            font-family: 'Iansui', system-ui, -apple-system, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        /* Viewport & CSS Variable Setup */
+        :root {
+            --item-h: clamp(140px, 38vh, 400px);
+        }
+
+        @media (max-width: 640px) {
+            :root {
+                --item-h: clamp(110px, 25vh, 200px);
+            }
+        }
+
+        /* Royal Amethyst Radial Gradient Background */
+        .bg-royal-amethyst {
+            background: radial-gradient(circle at 50% 35%, #7e22ce 0%, #581c87 35%, #3b0764 70%, #090514 100%);
+        }
+
+        /* Text Glowing Effects */
+        .neon-gold-text {
+            color: #fef08a;
+            text-shadow: 0 0 10px rgba(250, 204, 21, 0.8),
+                         0 0 20px rgba(234, 179, 8, 0.6),
+                         0 0 35px rgba(202, 138, 4, 0.4);
+        }
+
+        .purple-glow {
+            box-shadow: 0 0 25px rgba(168, 85, 247, 0.6), 
+                        inset 0 0 15px rgba(192, 132, 252, 0.4);
+        }
+
+        /* Slot Reel Cards & Font Scaling */
+        .reel-viewport {
+            height: var(--item-h);
+            perspective: 1000px;
+        }
+
+        .reel-card {
+            height: var(--item-h);
+            padding-bottom: 0.12em; /* Bottom padding offset for p, j, g, ⁿ */
+        }
+
+        /* Dynamic Font Sizes relative to --item-h */
+        .font-len-1 { font-size: calc(var(--item-h) * 0.76); line-height: 1; }
+        .font-len-2 { font-size: calc(var(--item-h) * 0.63); line-height: 1; }
+        .font-len-3 { font-size: calc(var(--item-h) * 0.50); line-height: 1; }
+        .font-len-4 { font-size: calc(var(--item-h) * 0.40); line-height: 1; }
+        .font-len-welcome { font-size: calc(var(--item-h) * 0.22); line-height: 1.1; }
+
+        /* Smooth Reel Animation CSS */
+        .reel-strip {
+            transition: transform 2s cubic-bezier(0.15, 0.85, 0.35, 1.05);
+            will-change: transform;
+        }
+
+        /* Blinking LED Lights Effect */
+        @keyframes blink-pink {
+            0%, 100% { background-color: #ec4899; box-shadow: 0 0 8px #ec4899; }
+            50% { background-color: #831843; box-shadow: none; }
+        }
+        @keyframes blink-purple {
+            0%, 100% { background-color: #c084fc; box-shadow: 0 0 8px #c084fc; }
+            50% { background-color: #581c87; box-shadow: none; }
+        }
+
+        .led-pink { animation: blink-pink 1.2s infinite alternate; }
+        .led-purple { animation: blink-purple 1.2s infinite alternate-reverse; }
+
+        /* Custom Scrollbar for Settings & Overlay */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #a855f7;
+            border-radius: 4px;
+        }
+
+        /* Pulse Highlight for Click-to-Start Prompt */
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 0.9; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.03); }
+        }
+        .btn-pulse {
+            animation: pulse-glow 2s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="h-full w-full bg-royal-amethyst text-white overflow-hidden select-none flex flex-col justify-between">
+
+    <!-- Audio Autoplay Banner overlay for strict browser audio policies -->
+    <div id="audio-start-overlay" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex flex-col items-center justify-center p-6 text-center cursor-pointer">
+        <div class="bg-purple-900/90 border-2 border-amber-400 rounded-3xl p-8 max-w-lg shadow-2xl flex flex-col items-center gap-6 btn-pulse">
+            <div class="w-20 h-20 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 flex items-center justify-center text-purple-950 text-4xl shadow-lg">
+                <i class="fa-solid fa-play ml-1"></i>
+            </div>
+            <div>
+                <h2 class="text-3xl font-bold text-amber-300 mb-2">點擊螢幕開始課堂教學</h2>
+                <p class="text-purple-200 text-base">自動啟用 Web Audio 聲音與電玩風背景音樂</p>
+            </div>
+            <span class="px-6 py-2 rounded-full bg-amber-400 text-purple-950 font-bold text-sm">準備就緒 (Chún-pī)</span>
+        </div>
+    </div>
+
+    <!-- MAIN VIEWPORT CONTAINER (100vh strict budget) -->
+    <div class="w-full h-full flex flex-col justify-between items-center relative z-10 px-4">
+
+        <!-- ==================== SECTION 1: TOP TITLE AREA (10vh Budget) ==================== -->
+        <header class="h-[10vh] w-full flex items-center justify-between relative max-w-6xl mx-auto pt-2">
+            <!-- Left Side Action Icons -->
+            <div class="flex items-center gap-3 z-20">
+                <button id="btn-open-chart" class="bg-purple-900/80 hover:bg-purple-800 border border-purple-400/50 text-amber-300 text-sm md:text-base font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow-lg transition active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-list"></i>
+                    <span>對照字表</span>
+                </button>
+            </div>
+
+            <!-- Main Title (白話字-聲母+韻母) Always Centered -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <h1 class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-wider neon-gold-text whitespace-nowrap drop-shadow-md">
+                    白話字-聲母+韻母
+                </h1>
+            </div>
+
+            <!-- Right Side Settings & Audio Controls -->
+            <div class="flex items-center gap-2 md:gap-3 z-20">
+                <!-- BGM Toggle Button -->
+                <button id="btn-toggle-bgm" class="bg-purple-900/80 hover:bg-purple-800 border border-purple-400/50 text-emerald-400 text-xs md:text-sm font-bold px-3 py-1.5 md:px-4 md:py-2 rounded-xl shadow-lg transition active:scale-95 flex items-center gap-2">
+                    <span id="bgm-indicator" class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span id="bgm-text">🎶 電玩風</span>
+                </button>
+
+                <!-- Settings Cog Button -->
+                <button id="btn-open-settings" class="bg-purple-900/80 hover:bg-purple-800 border border-purple-400/50 text-purple-200 hover:text-white p-2 md:p-2.5 rounded-xl shadow-lg transition active:scale-95 text-base md:text-lg">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+            </div>
+        </header>
+
+
+        <!-- ==================== SECTION 2: MIDDLE SLOT MACHINE AREA (68vh Budget) ==================== -->
+        <main class="h-[68vh] w-full flex items-center justify-center relative my-auto max-w-5xl">
+            <!-- Outer Machine Frame with LED Indicators & Glowing Effects -->
+            <div class="w-full max-w-4xl bg-gradient-to-b from-purple-900 via-indigo-950 to-purple-950 p-3 sm:p-5 md:p-6 rounded-3xl border-4 border-purple-300/40 purple-glow shadow-2xl relative flex flex-col items-center">
+                
+                <!-- Top LED Row -->
+                <div class="w-full flex justify-between px-4 pb-3">
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 rounded-full led-pink"></span>
+                        <span class="w-3 h-3 rounded-full led-purple"></span>
+                        <span class="w-3 h-3 rounded-full led-pink"></span>
+                    </div>
+                    <div class="text-xs text-purple-300 font-bold uppercase tracking-widest hidden sm:block">Classroom Dual Slot Machine</div>
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 rounded-full led-purple"></span>
+                        <span class="w-3 h-3 rounded-full led-pink"></span>
+                        <span class="w-3 h-3 rounded-full led-purple"></span>
+                    </div>
+                </div>
+
+                <!-- Dual Reel Container -->
+                <div class="w-full grid grid-cols-2 gap-3 sm:gap-6 bg-purple-950/80 p-2 sm:p-4 rounded-2xl border border-purple-700/50 relative shadow-inner">
+                    
+                    <!-- Left Reel Container -->
+                    <div id="zone-left" class="relative reel-viewport rounded-xl overflow-hidden bg-white text-purple-950 shadow-md border-2 border-amber-300/60 cursor-pointer group">
+                        <!-- Left Reel Moving Strip -->
+                        <div id="strip-left" class="reel-strip w-full flex flex-col items-center">
+                            <!-- Injected by JS -->
+                        </div>
+                        <!-- Top/Bottom Curved Gradient Shading Overlays -->
+                        <div class="absolute inset-x-0 top-0 h-1/5 bg-gradient-to-b from-purple-950/60 via-purple-950/20 to-transparent pointer-events-none z-10"></div>
+                        <div class="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-purple-950/60 via-purple-950/20 to-transparent pointer-events-none z-10"></div>
+                        <!-- Hover Indicator Accent -->
+                        <div class="absolute inset-0 border-2 border-amber-400 opacity-0 group-hover:opacity-100 transition pointer-events-none rounded-xl z-20"></div>
+                    </div>
+
+                    <!-- Right Reel Container -->
+                    <div id="zone-right" class="relative reel-viewport rounded-xl overflow-hidden bg-white text-purple-950 shadow-md border-2 border-amber-300/60 cursor-pointer group">
+                        <!-- Right Reel Moving Strip -->
+                        <div id="strip-right" class="reel-strip w-full flex flex-col items-center">
+                            <!-- Injected by JS -->
+                        </div>
+                        <!-- Top/Bottom Curved Gradient Shading Overlays -->
+                        <div class="absolute inset-x-0 top-0 h-1/5 bg-gradient-to-b from-purple-950/60 via-purple-950/20 to-transparent pointer-events-none z-10"></div>
+                        <div class="absolute inset-x-0 bottom-0 h-1/5 bg-gradient-to-t from-purple-950/60 via-purple-950/20 to-transparent pointer-events-none z-10"></div>
+                        <!-- Hover Indicator Accent -->
+                        <div class="absolute inset-0 border-2 border-amber-400 opacity-0 group-hover:opacity-100 transition pointer-events-none rounded-xl z-20"></div>
+                    </div>
+
+                    <!-- Spin Animation Shield Overlay (Prevents spam clicks during spin) -->
+                    <div id="spin-shield" class="absolute inset-0 z-30 hidden pointer-events-auto"></div>
+                </div>
+
+                <!-- Bottom LED Row -->
+                <div class="w-full flex justify-between px-4 pt-3">
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 rounded-full led-purple"></span>
+                        <span class="w-3 h-3 rounded-full led-pink"></span>
+                        <span class="w-3 h-3 rounded-full led-purple"></span>
+                    </div>
+                    <div class="flex gap-2">
+                        <span class="w-3 h-3 rounded-full led-pink"></span>
+                        <span class="w-3 h-3 rounded-full led-purple"></span>
+                        <span class="w-3 h-3 rounded-full led-pink"></span>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+
+        <!-- ==================== SECTION 3: BOTTOM CONTROL AREA (22vh Budget) ==================== -->
+        <footer class="h-[22vh] w-full flex flex-col justify-end items-center max-w-4xl mx-auto pb-8 pt-2">
+            <!-- Progress Track Dots (20 Dots Floating Perfectly at Bottom) -->
+            <div class="w-full flex flex-col items-center gap-2">
+                <div class="flex justify-between items-center w-full px-2 text-xs font-bold text-amber-300/80">
+                    <span>進度 (Progress)</span>
+                    <span id="progress-text" class="text-white">0 / 20</span>
+                </div>
+                <!-- 20 Circular Progress Dots -->
+                <div id="progress-dots-container" class="w-full flex items-center justify-between gap-1 sm:gap-2 px-1">
+                    <!-- 20 Dots generated dynamically via JS -->
+                </div>
+            </div>
+        </footer>
+    </div>
+
+
+    <!-- ==================== OVERLAY 1: MATCHING CHART OVERLAY (90% Scaled, No-Wrap) ==================== -->
+    <div id="overlay-chart" class="fixed inset-0 z-40 bg-slate-950/90 backdrop-blur-md hidden flex-col p-4 sm:p-6 transition-opacity duration-300">
+        <!-- Overlay Header -->
+        <div class="w-full flex justify-between items-center pb-4 border-b border-purple-700/50 max-w-6xl mx-auto">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-clipboard-list text-2xl text-amber-400"></i>
+                <h2 class="text-2xl font-bold text-amber-300">教材對照字表 (Reference Table)</h2>
+            </div>
+            <button id="btn-close-chart" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2 rounded-xl shadow-lg transition active:scale-95 flex items-center gap-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+                <span>關閉</span>
+            </button>
+        </div>
+
+        <!-- Chart Grid Content -->
+        <div class="w-full flex-1 overflow-y-auto custom-scrollbar max-w-6xl mx-auto py-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Left Reel Chart -->
+                <div class="bg-purple-900/40 p-4 rounded-2xl border border-purple-500/30 flex flex-col gap-3">
+                    <h3 class="text-lg font-bold text-amber-400 pb-2 border-b border-purple-600/40 flex items-center gap-2">
+                        <i class="fa-solid fa-[#0]"></i> 左欄聲母列表 (Slot Left)
+                    </h3>
+                    <div id="chart-list-left" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <!-- Left items injected by JS -->
+                    </div>
+                </div>
+
+                <!-- Right Reel Chart -->
+                <div class="bg-purple-900/40 p-4 rounded-2xl border border-purple-500/30 flex flex-col gap-3">
+                    <h3 class="text-lg font-bold text-amber-400 pb-2 border-b border-purple-600/40 flex items-center gap-2">
+                        <i class="fa-solid fa-[#0]"></i> 右欄韻母列表 (Slot Right)
+                    </h3>
+                    <div id="chart-list-right" class="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                        <!-- Right items injected by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== OVERLAY 2: CUSTOM SETTINGS PANEL ==================== -->
+    <div id="overlay-settings" class="fixed inset-0 z-40 bg-slate-950/90 backdrop-blur-md hidden flex-col p-4 sm:p-6 transition-opacity duration-300">
+        <!-- Settings Header -->
+        <div class="w-full flex justify-between items-center pb-4 border-b border-purple-700/50 max-w-4xl mx-auto">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-sliders text-2xl text-amber-400"></i>
+                <h2 class="text-2xl font-bold text-amber-300">自訂教材內容 (Data Settings)</h2>
+            </div>
+            <button id="btn-close-settings" class="bg-red-600 hover:bg-red-700 text-white font-bold px-5 py-2 rounded-xl shadow-lg transition active:scale-95 flex items-center gap-2">
+                <i class="fa-solid fa-xmark text-lg"></i>
+                <span>關閉</span>
+            </button>
+        </div>
+
+        <!-- Settings Form -->
+        <div class="w-full flex-1 overflow-y-auto custom-scrollbar max-w-4xl mx-auto py-6 space-y-6">
+            <div class="bg-purple-900/30 p-4 sm:p-6 rounded-2xl border border-purple-600/30 space-y-4">
+                <div>
+                    <label class="block text-amber-300 font-bold mb-1 text-base">左欄聲母教材 (Slot Left Data)</label>
+                    <p class="text-xs text-purple-300 mb-2">請使用半形逗號 , 分隔項目</p>
+                    <textarea id="input-left-data" rows="4" class="w-full bg-slate-900/90 border border-purple-400/50 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm font-mono"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-amber-300 font-bold mb-1 text-base">右欄韻母教材 (Slot Right Data)</label>
+                    <p class="text-xs text-purple-300 mb-2">請使用半形逗號 , 分隔項目</p>
+                    <textarea id="input-right-data" rows="4" class="w-full bg-slate-900/90 border border-purple-400/50 rounded-xl p-3 text-white focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 text-sm font-mono"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between gap-4 pt-2">
+                <button id="btn-reset-default" class="bg-slate-800 hover:bg-slate-700 text-purple-200 border border-purple-500/40 font-bold px-4 py-2.5 rounded-xl transition active:scale-95 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>恢復預設教材</span>
+                </button>
+
+                <button id="btn-save-settings" class="bg-amber-500 hover:bg-amber-400 text-purple-950 font-black px-6 py-2.5 rounded-xl shadow-lg transition active:scale-95 text-base flex items-center gap-2">
+                    <i class="fa-solid fa-floppy-disk"></i>
+                    <span>儲存並發布</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== JAVASCRIPT LOGIC & WEB AUDIO ENGINE ==================== -->
+    <script>
+        /**
+         * DEFAULT EDUCATIONAL DATA (Left and Right Reels - Pe̍h-ōe-jī Initials & Finals)
+         */
+        const DEFAULT_LEFT = ["p", "ph", "m", "b", "t", "th", "n", "l", "k", "kh", "h", "g", "ng", "ch", "chh", "s", "j"];
+        const DEFAULT_RIGHT = ["a", "i", "u", "o͘", "e", "o"];
+
+        // Isolated Storage Keys (Updated version suffix to apply new defaults cleanly)
+        const STORAGE_KEY_LEFT = 'slot_left_poj_v2';
+        const STORAGE_KEY_RIGHT = 'slot_right_poj_v2';
+
+        // State Machine Variables
+        let leftItems = [];
+        let rightItems = [];
+        let currentStep = 0; // 0 to 20
+        let currentCyclePhase = 'READY'; // 'READY', 'SPINNING', 'CELEBRATED'
+        let hoverZone = 'NONE'; // 'LEFT', 'RIGHT', 'NONE'
+        let isSettingsOpen = false;
+        let isChartOpen = false;
+
+        // Current Target Indexes
+        let targetLeftIdx = 0;
+        let targetRightIdx = 0;
+
+        // Reel Strips State
+        let leftStripElements = [];
+        let rightStripElements = [];
+
+        // WEB AUDIO API ENGINE & BGM PRESET
+        let audioCtx = null;
+        let isBgmOn = true;
+        let bgmTimer = null;
+        let bgmStep = 0;
+
+        // Synthesized Arcade Chords Array
+        const ARCADE_MELODY = [
+            { note: 261.63, dur: 0.15 }, // C4
+            { note: 329.63, dur: 0.15 }, // E4
+            { note: 392.00, dur: 0.15 }, // G4
+            { note: 523.25, dur: 0.20 }, // C5
+            { note: 392.00, dur: 0.15 }, // G4
+            { note: 523.25, dur: 0.30 }, // C5
+        ];
+
+        /**
+         * Initialize Audio Context safely
+         */
+        function initAudio() {
+            if (!audioCtx) {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                audioCtx = new AudioContextClass();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        /**
+         * Sound 1: Spin Tick Effect (0.03s Sine Decay 650Hz -> 1200Hz)
+         */
+        function playSpinTick() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                
+                const now = audioCtx.currentTime;
+                osc.frequency.setValueAtTime(650, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.03);
+                
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.03);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                
+                osc.start(now);
+                osc.stop(now + 0.03);
+            } catch(e) {}
+        }
+
+        /**
+         * Sound 2: Victory Chords Effect (C4, E4, G4, C5 Arpeggio)
+         */
+        function playVictoryChords() {
+            if (!audioCtx) return;
+            const notes = [261.63, 329.63, 392.00, 523.25]; // C4, E4, G4, C5
+            const now = audioCtx.currentTime;
+            
+            notes.forEach((freq, idx) => {
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(freq, now + idx * 0.07);
+                    
+                    gain.gain.setValueAtTime(0, now + idx * 0.07);
+                    gain.gain.linearRampToValueAtTime(0.25, now + idx * 0.07 + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.07 + 0.3);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start(now + idx * 0.07);
+                    osc.stop(now + idx * 0.07 + 0.3);
+                } catch(e) {}
+            });
+        }
+
+        /**
+         * UI Click Tick Sound
+         */
+        function playClickTick() {
+            if (!audioCtx) return;
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                const now = audioCtx.currentTime;
+                osc.frequency.setValueAtTime(800, now);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.001, now + 0.05);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } catch(e) {}
+        }
+
+        /**
+         * Background Arcade Music Loop Engine
+         */
+        function startBgmLoop() {
+            if (bgmTimer) clearInterval(bgmTimer);
+            bgmTimer = setInterval(() => {
+                if (!isBgmOn || !audioCtx) return;
+                const noteObj = ARCADE_MELODY[bgmStep % ARCADE_MELODY.length];
+                try {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(noteObj.note, audioCtx.currentTime);
+                    
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + noteObj.dur);
+                    
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + noteObj.dur);
+                } catch(e) {}
+                bgmStep++;
+            }, 260);
+        }
+
+        /**
+         * Determine Dynamic Font Size Class based on string length
+         */
+        function getFontClass(str) {
+            if (!str) return 'font-len-1';
+            const len = str.length;
+            if (str.includes('Chún') || str.includes('Oân')) return 'font-len-welcome';
+            if (len <= 1) return 'font-len-1';
+            if (len === 2) return 'font-len-2';
+            if (len === 3) return 'font-len-3';
+            return 'font-len-4';
+        }
+
+        /**
+         * Load Initial Data from LocalStorage
+         */
+        function loadData() {
+            const rawLeft = localStorage.getItem(STORAGE_KEY_LEFT);
+            const rawRight = localStorage.getItem(STORAGE_KEY_RIGHT);
+
+            leftItems = rawLeft ? JSON.parse(rawLeft) : [...DEFAULT_LEFT];
+            rightItems = rawRight ? JSON.parse(rawRight) : [...DEFAULT_RIGHT];
+
+            if (!leftItems || leftItems.length === 0) leftItems = [...DEFAULT_LEFT];
+            if (!rightItems || rightItems.length === 0) rightItems = [...DEFAULT_RIGHT];
+        }
+
+        /**
+         * Build Reel Strip DOM Structure (Pure CSS Percentage Translation Support)
+         */
+        function buildReelStrips() {
+            const stripLeft = document.getElementById('strip-left');
+            const stripRight = document.getElementById('strip-right');
+
+            // Build Left Strip: Initial Welcome Word -> Reel Items -> Duplicate for seamless scroll
+            const leftList = ["Chún-pī", ...leftItems, ...leftItems, ...leftItems];
+            stripLeft.innerHTML = leftList.map(item => `
+                <div class="reel-card w-full flex items-center justify-center font-black ${getFontClass(item)} transition-all">
+                    ${item}
+                </div>
+            `).join('');
+
+            // Build Right Strip
+            const rightList = ["Chún-pī", ...rightItems, ...rightItems, ...rightItems];
+            stripRight.innerHTML = rightList.map(item => `
+                <div class="reel-card w-full flex items-center justify-center font-black ${getFontClass(item)} transition-all">
+                    ${item}
+                </div>
+            `).join('');
+
+            leftStripElements = leftList;
+            rightStripElements = rightList;
+
+            // Reset translateY positions to 0% (Welcome state)
+            stripLeft.style.transform = 'translateY(0%)';
+            stripRight.style.transform = 'translateY(0%)';
+        }
+
+        /**
+         * Render 20 Progress Dots at the bottom
+         */
+        function renderProgressDots() {
+            const container = document.getElementById('progress-dots-container');
+            const textEl = document.getElementById('progress-text');
+            textEl.innerText = `${currentStep} / 20`;
+
+            let html = '';
+            for (let i = 1; i <= 20; i++) {
+                if (i <= currentStep) {
+                    html += `<div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-amber-400 shadow-[0_0_8px_#f59e0b] border border-amber-200 transition-all scale-110"></div>`;
+                } else {
+                    html += `<div class="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-purple-950/80 border border-purple-600/50 transition-all"></div>`;
+                }
+            }
+            container.innerHTML = html;
+        }
+
+        /**
+         * Render Reference Chart Overlay (90% Micro scale, No-Wrap layout)
+         */
+        function renderChartOverlay() {
+            const listLeft = document.getElementById('chart-list-left');
+            const listRight = document.getElementById('chart-list-right');
+
+            listLeft.innerHTML = leftItems.map(item => `
+                <div onclick="playClickTick()" class="bg-purple-950/80 hover:bg-amber-400 hover:text-purple-950 border border-purple-400/40 rounded-xl p-2 text-center transition cursor-pointer font-black min-h-[90px] flex items-center justify-center overflow-hidden whitespace-nowrap shadow">
+                    <span class="${getFontClass(item)} tracking-wide">${item}</span>
+                </div>
+            `).join('');
+
+            listRight.innerHTML = rightItems.map(item => `
+                <div onclick="playClickTick()" class="bg-purple-950/80 hover:bg-amber-400 hover:text-purple-950 border border-purple-400/40 rounded-xl p-2 text-center transition cursor-pointer font-black min-h-[90px] flex items-center justify-center overflow-hidden whitespace-nowrap shadow">
+                    <span class="${getFontClass(item)} tracking-wide">${item}</span>
+                </div>
+            `).join('');
+        }
+
+        /**
+         * Pure CSS Percentage Translation Spin Engine
+         * Formula: translateY(-( (M - 1) / M ) * 100%)
+         */
+        function spinReel(side, targetIndex) {
+            const strip = side === 'left' ? document.getElementById('strip-left') : document.getElementById('strip-right');
+            const totalItems = side === 'left' ? leftStripElements.length : rightStripElements.length;
+            const listLen = side === 'left' ? leftItems.length : rightItems.length;
+
+            // Reset transition briefly to snap back to top cycle seamlessly
+            strip.style.transition = 'none';
+            strip.style.transform = 'translateY(0%)';
+            
+            // Force DOM reflow
+            void strip.offsetWidth;
+
+            // Re-enable smooth 2.0s cubic-bezier spin
+            strip.style.transition = 'transform 2s cubic-bezier(0.15, 0.85, 0.35, 1.05)';
+
+            // Land on the 3rd repetition block (index 1 + listLen*2 + targetIndex)
+            const landPositionIndex = 1 + (listLen * 2) + targetIndex;
+            const M = totalItems;
+            const percentage = -((landPositionIndex) / M) * 100;
+
+            // Trigger Spin Ticks sound during reel movement (2.0 seconds duration)
+            let ticksCount = 0;
+            const tickInterval = setInterval(() => {
+                playSpinTick();
+                ticksCount++;
+                if (ticksCount >= 16) clearInterval(tickInterval);
+            }, 115);
+
+            strip.style.transform = `translateY(${percentage}%)`;
+        }
+
+        /**
+         * Spin a single reel individually for 2 seconds with shield protection
+         */
+        function spinSingleSide(side) {
+            if (isSettingsOpen || isChartOpen || currentCyclePhase === 'SPINNING') return;
+            initAudio();
+
+            const shield = document.getElementById('spin-shield');
+            const prevPhase = currentCyclePhase;
+            currentCyclePhase = 'SPINNING';
+            shield.classList.remove('hidden');
+
+            if (side === 'left') {
+                targetLeftIdx = Math.floor(Math.random() * leftItems.length);
+                spinReel('left', targetLeftIdx);
+            } else {
+                targetRightIdx = Math.floor(Math.random() * rightItems.length);
+                spinReel('right', targetRightIdx);
+            }
+
+            setTimeout(() => {
+                currentCyclePhase = prevPhase;
+                shield.classList.add('hidden');
+            }, 2000);
+        }
+
+        /**
+         * Execution of 3-Phase Classroom Control Loop
+         */
+        function handleMainCycle() {
+            if (isSettingsOpen || isChartOpen || currentCyclePhase === 'SPINNING') return;
+            initAudio();
+
+            const shield = document.getElementById('spin-shield');
+
+            // --- HOVER INDIVIDUAL SPIN MODE ---
+            if (hoverZone === 'LEFT') {
+                spinSingleSide('left');
+                return;
+            }
+            if (hoverZone === 'RIGHT') {
+                spinSingleSide('right');
+                return;
+            }
+
+            // --- SYNCHRONIZED DUAL SPIN CYCLE MODE ---
+            if (currentCyclePhase === 'READY') {
+                // Phase 1: Start Spinning (2.0 seconds)
+                currentCyclePhase = 'SPINNING';
+                shield.classList.remove('hidden');
+
+                // Pick random targets for both slots
+                targetLeftIdx = Math.floor(Math.random() * leftItems.length);
+                targetRightIdx = Math.floor(Math.random() * rightItems.length);
+
+                spinReel('left', targetLeftIdx);
+                spinReel('right', targetRightIdx);
+
+                // Stop after 2.0s and reveal answer
+                setTimeout(() => {
+                    currentCyclePhase = 'SPINNED_WAIT';
+                    shield.classList.add('hidden');
+                }, 2000);
+
+            } else if (currentCyclePhase === 'SPINNED_WAIT') {
+                // Phase 2: Celebrate & Score
+                currentCyclePhase = 'CELEBRATED';
+                
+                // Trigger Confetti Burst
+                try {
+                    confetti({
+                        particleCount: 75,
+                        spread: 70,
+                        origin: { y: 0.65 }
+                    });
+                } catch(e) {}
+
+                playVictoryChords();
+
+                // Increment Progress Step (max 20)
+                if (currentStep < 20) {
+                    currentStep++;
+                    renderProgressDots();
+                }
+
+            } else if (currentCyclePhase === 'CELEBRATED') {
+                // Phase 3: Next Question Start
+                currentCyclePhase = 'READY';
+                handleMainCycle(); // Chain directly to phase 1
+            }
+        }
+
+        /**
+         * EVENT LISTENERS & SETUP
+         */
+        function setupEventListeners() {
+            // Screen Start Audio Overlay Click
+            const overlay = document.getElementById('audio-start-overlay');
+            overlay.addEventListener('click', (e) => {
+                e.stopPropagation();
+                initAudio();
+                startBgmLoop();
+                overlay.classList.add('hidden');
+            });
+
+            // Blank Area / Global Screen Click -> Trigger Dual Reel 2-Second Cycle
+            document.body.addEventListener('click', (e) => {
+                // Ignore clicks if audio overlay is still visible or modals are open
+                if (!overlay.classList.contains('hidden')) return;
+                if (isSettingsOpen || isChartOpen) return;
+
+                // Ignore clicks on buttons, inputs, or inside overlays
+                if (e.target.closest('button') || e.target.closest('#overlay-chart') || e.target.closest('#overlay-settings')) {
+                    return;
+                }
+
+                // Trigger dual spin cycle (hoverZone is NONE when clicking blank area)
+                handleMainCycle();
+            });
+
+            // Hover Zones Detection & Individual 2-Second Click Spin
+            const zoneLeft = document.getElementById('zone-left');
+            const zoneRight = document.getElementById('zone-right');
+
+            zoneLeft.addEventListener('mouseenter', () => hoverZone = 'LEFT');
+            zoneLeft.addEventListener('mouseleave', () => hoverZone = 'NONE');
+            zoneLeft.addEventListener('click', (e) => {
+                e.stopPropagation();
+                spinSingleSide('left');
+            });
+
+            zoneRight.addEventListener('mouseenter', () => hoverZone = 'RIGHT');
+            zoneRight.addEventListener('mouseleave', () => hoverZone = 'NONE');
+            zoneRight.addEventListener('click', (e) => {
+                e.stopPropagation();
+                spinSingleSide('right');
+            });
+
+            // Global Keydown Handler (Presenter Clicker / Keyboard Support)
+            window.addEventListener('keydown', (e) => {
+                // Safe Input Lock Guard: Pause listener when settings/inputs are focused or chart is open
+                if (isSettingsOpen || isChartOpen) return;
+                const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : '';
+                if (activeTag === 'input' || activeTag === 'textarea') return;
+
+                // Presenter Pen keys: PageUp, PageDown, Space, Enter, Arrow Keys
+                const validKeys = ['PageUp', 'PageDown', ' ', 'Enter', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
+                if (validKeys.includes(e.key)) {
+                    e.preventDefault();
+                    handleMainCycle();
+                }
+            });
+
+            // Reference Chart Panel Controls
+            const chartOverlay = document.getElementById('overlay-chart');
+            document.getElementById('btn-open-chart').addEventListener('click', () => {
+                playClickTick();
+                isChartOpen = true;
+                renderChartOverlay();
+                chartOverlay.classList.remove('hidden');
+                chartOverlay.classList.add('flex');
+            });
+
+            document.getElementById('btn-close-chart').addEventListener('click', () => {
+                playClickTick();
+                isChartOpen = false;
+                chartOverlay.classList.add('hidden');
+                chartOverlay.classList.remove('flex');
+            });
+
+            // Custom Settings Panel Controls
+            const settingsOverlay = document.getElementById('overlay-settings');
+            const inputLeft = document.getElementById('input-left-data');
+            const inputRight = document.getElementById('input-right-data');
+
+            document.getElementById('btn-open-settings').addEventListener('click', () => {
+                playClickTick();
+                isSettingsOpen = true;
+                inputLeft.value = leftItems.join(',');
+                inputRight.value = rightItems.join(',');
+                settingsOverlay.classList.remove('hidden');
+                settingsOverlay.classList.add('flex');
+            });
+
+            document.getElementById('btn-close-settings').addEventListener('click', () => {
+                playClickTick();
+                isSettingsOpen = false;
+                settingsOverlay.classList.add('hidden');
+                settingsOverlay.classList.remove('flex');
+            });
+
+            // Save Settings
+            document.getElementById('btn-save-settings').addEventListener('click', () => {
+                playClickTick();
+                const parsedLeft = inputLeft.value.split(',').map(s => s.trim()).filter(Boolean);
+                const parsedRight = inputRight.value.split(',').map(s => s.trim()).filter(Boolean);
+
+                if (parsedLeft.length > 0 && parsedRight.length > 0) {
+                    leftItems = parsedLeft;
+                    rightItems = parsedRight;
+
+                    // Parallel Isolated LocalStorage
+                    localStorage.setItem(STORAGE_KEY_LEFT, JSON.stringify(leftItems));
+                    localStorage.setItem(STORAGE_KEY_RIGHT, JSON.stringify(rightItems));
+
+                    buildReelStrips();
+                    isSettingsOpen = false;
+                    settingsOverlay.classList.add('hidden');
+                    settingsOverlay.classList.remove('flex');
+                }
+            });
+
+            // Reset Default Settings
+            document.getElementById('btn-reset-default').addEventListener('click', () => {
+                playClickTick();
+                leftItems = [...DEFAULT_LEFT];
+                rightItems = [...DEFAULT_RIGHT];
+                inputLeft.value = leftItems.join(',');
+                inputRight.value = rightItems.join(',');
+
+                localStorage.removeItem(STORAGE_KEY_LEFT);
+                localStorage.removeItem(STORAGE_KEY_RIGHT);
+
+                buildReelStrips();
+            });
+
+            // BGM Toggle Button
+            const bgmBtn = document.getElementById('btn-toggle-bgm');
+            const bgmInd = document.getElementById('bgm-indicator');
+            const bgmTxt = document.getElementById('bgm-text');
+
+            bgmBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                initAudio();
+                isBgmOn = !isBgmOn;
+                if (isBgmOn) {
+                    bgmInd.className = 'w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse';
+                    bgmTxt.innerText = '🎶 電玩風';
+                    startBgmLoop();
+                } else {
+                    bgmInd.className = 'w-2.5 h-2.5 rounded-full bg-gray-500';
+                    bgmTxt.innerText = '🔇 已靜音';
+                    if (bgmTimer) clearInterval(bgmTimer);
+                }
+            });
+        }
+
+        /**
+         * DOM Initializer
+         */
+        window.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            buildReelStrips();
+            renderProgressDots();
+            setupEventListeners();
+        });
+    </script>
+</body>
+</html>
